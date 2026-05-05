@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunty - Modales de Perfil por Rol</title>
+    <link href="https://cdn.jsdelivr.net/npm/lucide@latest" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #efefef 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-section h1 {
+            color: #1b4a3a;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .title-section p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .modal-wrapper {
+            perspective: 1000px;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .role-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #1b4a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .role-icon svg {
+            width: 18px;
+            height: 18px;
+            color: white;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .header-text h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1b4a3a;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 20px;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #1b4a3a;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-input-icon {
+            position: absolute;
+            left: 12px;
+            color: #9ca3af;
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-input-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px 10px 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1f2937;
+            background: #ffffff;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1b4a3a;
+            box-shadow: 0 0 0 3px rgba(27, 74, 58, 0.1);
+        }
+
+        .form-input:disabled,
+        .form-input-readonly {
+            background: #f9fafb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .form-input-readonly {
+            cursor: default;
+        }
+
+        .avatar-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+            margin-top: 12px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+        }
+
+        .avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1b4a3a 0%, #2d6a5a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            border: 3px solid #e5e7eb;
+        }
+
+        .avatar-edit-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #1b4a3a;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .avatar-edit-btn:hover {
+            background: #0f3429;
+            transform: scale(1.05);
+        }
+
+        .avatar-edit-btn svg {
+            width: 14px;
+            height: 14px;
+            color: white;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: #f3f4f6;
+            margin: 24px 0;
+        }
+
+        .section-subtitle {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-active {
+            background: #d1f3e9;
+            color: #065f46;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-neutral {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .chips-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #fafbfc;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-cancel:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn-save {
+            background: #1b4a3a;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #0f3429;
+            box-shadow: 0 4px 12px rgba(27, 74, 58, 0.3);
+        }
+
+        .role-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                max-height: calc(100vh - 40px);
+            }
+        }
+
+        /* Custom Scrollbar */
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-section">
+            <h1>🎭 Modales de Perfil — Sistema de Bunty</h1>
+            <p>Grid comparativo de los 7 roles. Mismo contenedor visual, contenido adaptado por rol.</p>
+        </div>
+
+        <div class="grid">
+            <!-- 1. SUPER ADMIN -->
+            <div class="modal-wrapper">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="header-left">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m3.08 3.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m3.08-3.08l4.24-4.24M19.78 19.78l-4.24-4.24m-3.08-3.08l-4.24-4.24"></path>
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h2>Editar Super Administrador</h2>
+                            </div>
+                        </div>
+                        <button class="close-btn">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <div class="avatar">👤</div>
+                                <button class="avatar-edit-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" placeholder="Nombre completo" value="Carlos Martínez">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Documento</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" placeholder="DNI / Cédula" value="1234567890">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo Electrónico</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                </div>
+                                <input type="email" class="form-input" placeholder="correo@ejemplo.com" value="carlos@bunty.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" placeholder="+34 600 000 000" value="+34 912 345 678">
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Estado de Acceso</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Rol</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6h12c0-3.31-2.69-6-6-6z"></path></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Super Administrador" disabled>
+                            </div>
+                            <span class="badge badge-active" style="margin-top: 8px;">Rol Activo</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Permisos Activos</label>
+                            <div class="chips-row">
+                                <span class="chip">Gestión de usuarios</span>
+                                <span class="chip">Reportes</span>
+                                <span class="chip">Configuración</span>
+                                <span class="chip">Auditoría</span>
+                                <span class="chip">Facturación</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Fecha de Creación</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="15 de Enero, 2024" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-cancel">Cancelar</button>
+                        <button class="btn btn-save">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ADMINISTRADOR -->
+            <div class="modal-wrapper">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="header-left">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h2>Editar Administrador</h2>
+                            </div>
+                        </div>
+                        <button class="close-btn">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <div class="avatar">👤</div>
+                                <button class="avatar-edit-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" placeholder="Nombre completo" value="María García López">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Documento</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="9876543210">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                </div>
+                                <input type="email" class="form-input" value="maria@building.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 934 567 890">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Unidad Asignada</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Oficina Administrativa" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Conjunto/Edificio</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Residencial Montaña" disabled>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Información de Emergencia</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Contacto de Emergencia</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Juan García (Hermano)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono de Emergencia</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 645 321 987">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-cancel">Cancelar</button>
+                        <button class="btn btn-save">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. CONSEJO DE ADMINISTRACIÓN -->
+            <div class="modal-wrapper">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="header-left">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h2>Editar Consejero</h2>
+                            </div>
+                        </div>
+                        <button class="close-btn">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <div class="avatar">👤</div>
+                                <button class="avatar-edit-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Roberto Sánchez Díaz">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Documento</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="5432109876">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                </div>
+                                <input type="email" class="form-input" value="roberto@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 655 444 333">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Unidad</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Apt. 402" disabled>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Cargo en el Consejo</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Cargo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h18M12 3v18"></path></svg>
+                                </div>
+                                <select class="form-input" style="appearance: none;">
+                                    <option selected>Presidente</option>
+                                    <option>Vocal</option>
+                                    <option>Tesorero</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Periodo de Gestión (Inicio)</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="01/01/2023">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Periodo de Gestión (Fin)</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="31/12/2024">
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Contacto de Emergencia</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Contacto</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Claudia (Esposa)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 622 111 222">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-cancel">Cancelar</button>
+                        <button class="btn btn-save">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. PROPIETARIO -->
+            <div class="modal-wrapper">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="header-left">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h2>Editar Propietario</h2>
+                            </div>
+                        </div>
+                        <button class="close-btn">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <div class="avatar">👤</div>
+                                <button class="avatar-edit-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Alejandro Ruiz Fernández">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Documento</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="8765432109">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                </div>
+                                <input type="email" class="form-input" value="alejandro@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 688 999 777">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Unidad</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Apt. 601" disabled>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Estado de Pago</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Estado</label>
+                            <div style="margin-top: 8px;">
+                                <span class="badge badge-active">Al Día</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Vehículos Registrados</label>
+                            <div class="chips-row">
+                                <span class="chip">Toyota Corolla - ABD1234</span>
+                                <span class="chip">Honda CR-V - XYZ5678</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Mascotas Registradas</label>
+                            <div class="chips-row">
+                                <span class="chip">Max (Perro)</span>
+                                <span class="chip">Misi (Gato)</span>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Contacto de Emergencia</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Contacto</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Patricia Ruiz (Hermana)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 722 555 666">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-cancel">Cancelar</button>
+                        <button class="btn btn-save">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. ARRENDATARIO -->
+            <div class="modal-wrapper">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="header-left">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h2>Editar Arrendatario</h2>
+                            </div>
+                        </div>
+                        <button class="close-btn">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <div class="avatar">👤</div>
+                                <button class="avatar-edit-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Sofia Moreno García">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Documento</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="3210987654">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                </div>
+                                <input type="email" class="form-input" value="sofia.moreno@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 656 333 444">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Unidad</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Apt. 301" disabled>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Detalles del Contrato</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Propietario del Inmueble</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Alejandro Ruiz Fernández" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Fecha Inicio Contrato</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="15/03/2023">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Fecha Fin Contrato</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="14/03/2025">
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Contacto de Emergencia</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Contacto</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Marco Moreno (Padre)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 699 777 888">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-cancel">Cancelar</button>
+                        <button class="btn btn-save">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. SEGURIDAD -->
+            <div class="modal-wrapper">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="header-left">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h2>Editar Seguridad</h2>
+                            </div>
+                        </div>
+                        <button class="close-btn">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <div class="avatar">👤</div>
+                                <button class="avatar-edit-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Juan Carlos López Torres">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Documento</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="7654321098">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                </div>
+                                <input type="email" class="form-input" value="juan.carlos@seguridad.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 666 123 456">
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Información Laboral</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Turno Asignado</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                                </div>
+                                <input type="text" class="form-input form-input-readonly" value="Tarde (14:00 - 22:00)" disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Empresa de Seguridad</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <input type="text" class="form-input" value="SecureGuard S.A.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ID Laboral</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="SG-2024-0847">
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Contacto de Emergencia</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Contacto</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="María López (Esposa)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 633 555 777">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-cancel">Cancelar</button>
+                        <button class="btn btn-save">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. PROVEEDOR -->
+            <div class="modal-wrapper">
+                <div class="modal">
+                    <div class="modal-header">
+                        <div class="header-left">
+                            <div class="role-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h2>Editar Proveedor</h2>
+                            </div>
+                        </div>
+                        <button class="close-btn">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <div class="avatar">🏢</div>
+                                <button class="avatar-edit-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Francisco Díaz Rodríguez">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">NIT / RUT</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10"></path></svg>
+                                </div>
+                                <input type="text" class="form-input" value="123.456.789-0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                </div>
+                                <input type="email" class="form-input" value="info@mantenimientodiaz.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </div>
+                                <input type="tel" class="form-input" value="+34 912 345 678">
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Datos de la Empresa</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre de la Empresa</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                </div>
+                                <input type="text" class="form-input" value="Mantenimiento Díaz S.L.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Servicio</label>
+                            <div class="form-input-wrapper">
+                                <div class="form-input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 10m10 0h2m-10 0h10l4-8"></path></svg>
+                                </div>
+                                <select class="form-input" style="appearance: none;">
+                                    <option selected>Mantenimiento</option>
+                                    <option>Limpieza</option>
+                                    <option>Construcción</option>
+                                    <option>Plomería</option>
+                                    <option>Electricidad</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Documentos (RUT/Certificados)</label>
+                            <button style="width: 100%; padding: 10px; border: 2px dashed #e5e7eb; border-radius: 6px; background: #f9fafb; color: #1b4a3a; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                📎 Cargar documentos
+                            </button>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-subtitle">Evaluación</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Calificación Promedio</label>
+                            <div style="margin-top: 8px; display: flex; gap: 4px;">
+                                <span style="color: #fbbf24; font-size: 18px;">★★★★☆</span>
+                                <span style="color: #6b7280; font-weight: 600;">4.2 / 5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-cancel">Cancelar</button>
+                        <button class="btn btn-save">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

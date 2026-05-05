@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunty - Design System & Component Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .design-system {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* ==================== HEADER ==================== */
+        .system-header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .system-header h1 {
+            font-size: 36px;
+            color: #1b4a3a;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+
+        .system-header p {
+            font-size: 16px;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ==================== SECCIONES ==================== */
+        .section {
+            margin-bottom: 60px;
+            scroll-margin-top: 80px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #1b4a3a;
+            font-weight: 700;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* ==================== COLORES ==================== */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .color-box {
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .color-name {
+            font-weight: 700;
+            color: #1b4a3a;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .color-value {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        /* ==================== COMPONENTES ==================== */
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .component {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .component-preview {
+            padding: 32px;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .component-code {
+            background: #0f172a;
+            color: #e0e7ff;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            line-height: 1.5;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .component-label {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .component-label strong {
+            color: #1b4a3a;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .component-label small {
+            color: #6b7280;
+        }
+
+        /* ==================== BOTONES ==================== */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #1b4a3a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0f3429;
+            box-shadow: 0 4px 12px rgba(27, 74, 58, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1b4a3a;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fca5a5;
+            border-color: #991b1b;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* ==================== INPUTS ==================== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1f2937;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1b4a3a;
+            box-shadow: 0 0 0 3px rgba(27, 74, 58, 0.1);
+        }
+
+        /* ==================== BADGES ==================== */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-success {
+            background: #d1f3e9;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* ==================== CARDS ==================== */
+        .card {
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            max-width: 240px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1b4a3a;
+            margin-bottom: 8px;
+        }
+
+        .card-text {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        /* ==================== MODAL ==================== */
+        .modal-preview {
+            position: relative;
+            width: 100%;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            color: #1b4a3a;
+            font-size: 18px;
+        }
+
+        .modal-body {
+            padding: 24px;
+            min-height: 150px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #fafbfc;
+        }
+
+        /* ==================== TABLA ==================== */
+        .table-demo {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .table-demo thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .table-demo th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .table-demo td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .table-demo tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* ==================== TIPOGRAFÍA ==================== */
+        .typography-grid {
+            display: grid;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .typography-item {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .typography-sample {
+            margin-bottom: 12px;
+        }
+
+        .typography-name {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* H1 */
+        .typo-h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1b4a3a;
+            line-height: 1.2;
+        }
+
+        /* H2 */
+        .typo-h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1b4a3a;
+            line-height: 1.3;
+        }
+
+        /* H3 */
+        .typo-h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1b4a3a;
+            line-height: 1.4;
+        }
+
+        /* Body */
+        .typo-body {
+            font-size: 14px;
+            font-weight: 400;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        /* Caption */
+        .typo-caption {
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        /* ==================== UTILIDADES ==================== */
+        .code-block {
+            background: #0f172a;
+            color: #e0e7ff;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            line-height: 1.6;
+            margin: 16px 0;
+        }
+
+        .grid-demo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .grid-box {
+            background: linear-gradient(135deg, #1b4a3a 0%, #2d6a5a 100%);
+            height: 60px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            .design-system {
+                padding: 20px;
+            }
+
+            .system-header h1 {
+                font-size: 28px;
+            }
+
+            .color-grid,
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 20px;
+            }
+        }
+
+        /* Nav interna */
+        .toc {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 40px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .toc h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1b4a3a;
+            margin-bottom: 12px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            color: #1b4a3a;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: #0f3429;
+        }
+    </style>
+</head>
+<body>
+    <div class="design-system">
+        <!-- HEADER -->
+        <div class="system-header">
+            <h1>🎨 BUNTY Design System</h1>
+            <p>Guía completa de componentes, colores y patrones de diseño para el módulo de Perfil y Reservas</p>
+        </div>
+
+        <!-- ==================== PALETA DE COLORES ==================== -->
+        <div class="section">
+            <h2 class="section-title">🎨 Paleta de Colores</h2>
+            <p class="section-subtitle">Colores primarios, secundarios y semánticos para toda la aplicación</p>
+
+            <div class="color-grid">
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #1b4a3a;"></div>
+                    <div class="color-name">Verde Oscuro (Primario)</div>
+                    <div class="color-value">
+                        HEX: #1b4a3a<br>
+                        RGB: 27, 74, 58<br>
+                        <strong>Uso:</strong> Headers, botones principales, accents
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #0f3429;"></div>
+                    <div class="color-name">Verde Oscuro (Hover)</div>
+                    <div class="color-value">
+                        HEX: #0f3429<br>
+                        RGB: 15, 52, 41<br>
+                        <strong>Uso:</strong> Estados hover/active
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #ffffff; border: 2px solid #e5e7eb;"></div>
+                    <div class="color-name">Blanco</div>
+                    <div class="color-value">
+                        HEX: #FFFFFF<br>
+                        <strong>Uso:</strong> Fondos, text en botones primarios
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #f9fafb;"></div>
+                    <div class="color-name">Gris Muy Claro</div>
+                    <div class="color-value">
+                        HEX: #f9fafb<br>
+                        <strong>Uso:</strong> Fondos alternativos, hover
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #e5e7eb;"></div>
+                    <div class="color-name">Gris Claro (Bordes)</div>
+                    <div class="color-value">
+                        HEX: #e5e7eb<br>
+                        <strong>Uso:</strong> Bordes de inputs, separadores
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #6b7280;"></div>
+                    <div class="color-name">Gris Texto Secundario</div>
+                    <div class="color-value">
+                        HEX: #6b7280<br>
+                        <strong>Uso:</strong> Labels, hints, small text
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #d1f3e9;"></div>
+                    <div class="color-name">Verde Éxito (Fondo)</div>
+                    <div class="color-value">
+                        HEX: #d1f3e9<br>
+                        <strong>Uso:</strong> Badges de éxito, estados positivos
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #065f46;"></div>
+                    <div class="color-name">Verde Éxito (Texto)</div>
+                    <div class="color-value">
+                        HEX: #065f46<br>
+                        <strong>Uso:</strong> Texto en badges de éxito
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #fee2e2;"></div>
+                    <div class="color-name">Rojo Error (Fondo)</div>
+                    <div class="color-value">
+                        HEX: #fee2e2<br>
+                        <strong>Uso:</strong> Badges de error, estados negativos
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #991b1b;"></div>
+                    <div class="color-name">Rojo Error (Texto)</div>
+                    <div class="color-value">
+                        HEX: #991b1b<br>
+                        <strong>Uso:</strong> Texto en badges de error
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #fef3c7;"></div>
+                    <div class="color-name">Amarillo Advertencia (Fondo)</div>
+                    <div class="color-value">
+                        HEX: #fef3c7<br>
+                        <strong>Uso:</strong> Badges de advertencia, estados pendientes
+                    </div>
+                </div>
+
+                <div class="color-box">
+                    <div class="color-swatch" style="background: #92400e;"></div>
+                    <div class="color-name">Amarillo Advertencia (Texto)</div>
+                    <div class="color-value">
+                        HEX: #92400e<br>
+                        <strong>Uso:</strong> Texto en badges de advertencia
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TIPOGRAFÍA ==================== -->
+        <div class="section">
+            <h2 class="section-title">✍️ Tipografía</h2>
+            <p class="section-subtitle">Familia: Inter o equivalente sans-serif moderna</p>
+
+            <div class="typography-grid">
+                <div class="typography-item">
+                    <div class="typography-name">Heading 1</div>
+                    <div class="typography-sample">
+                        <div class="typo-h1">Gestión de Reservas</div>
+                    </div>
+                    <small>28px, 700 weight, line-height 1.2</small>
+                </div>
+
+                <div class="typography-item">
+                    <div class="typography-name">Heading 2</div>
+                    <div class="typography-sample">
+                        <div class="typo-h2">Editar Perfil</div>
+                    </div>
+                    <small>24px, 700 weight, line-height 1.3</small>
+                </div>
+
+                <div class="typography-item">
+                    <div class="typography-name">Heading 3</div>
+                    <div class="typography-sample">
+                        <div class="typo-h3">Datos Personales</div>
+                    </div>
+                    <small>18px, 700 weight, line-height 1.4</small>
+                </div>
+
+                <div class="typography-item">
+                    <div class="typography-name">Body Regular</div>
+                    <div class="typography-sample">
+                        <div class="typo-body">Acepto el reglamento de uso de espacios comunales</div>
+                    </div>
+                    <small>14px, 400 weight, line-height 1.6</small>
+                </div>
+
+                <div class="typography-item">
+                    <div class="typography-name">Caption / Label</div>
+                    <div class="typography-sample">
+                        <div class="typo-caption">NOMBRE COMPLETO (UPPERCASE)</div>
+                    </div>
+                    <small>12px, 600 weight, letter-spacing 0.3px</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== BOTONES ==================== -->
+        <div class="section">
+            <h2 class="section-title">🔘 Botones</h2>
+
+            <div class="component-grid">
+                <div class="component">
+                    <div class="component-preview">
+                        <button class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                    <div class="component-code">
+.btn-primary {
+  background: #1b4a3a;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+                    </div>
+                    <div class="component-label">
+                        <strong>Primario</strong>
+                        <small>Acciones principales, CTAs</small>
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-preview">
+                        <button class="btn btn-secondary">Cancelar</button>
+                    </div>
+                    <div class="component-code">
+.btn-secondary {
+  background: white;
+  color: #1b4a3a;
+  border: 1px solid #d1d5db;
+  padding: 10px 20px;
+  border-radius: 6px;
+}
+                    </div>
+                    <div class="component-label">
+                        <strong>Secundario</strong>
+                        <small>Acciones secundarias</small>
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-preview">
+                        <button class="btn btn-danger">Cancelar Reserva</button>
+                    </div>
+                    <div class="component-code">
+.btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 10px 20px;
+}
+                    </div>
+                    <div class="component-label">
+                        <strong>Peligro</strong>
+                        <small>Acciones destructivas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== BADGESINPUTS ==================== -->
+        <div class="section">
+            <h2 class="section-title">🏷️ Badges de Estado</h2>
+
+            <div class="component-grid">
+                <div class="component">
+                    <div class="component-preview">
+                        <span class="badge badge-success">Al Día</span>
+                    </div>
+                    <div class="component-label">
+                        <strong>Éxito / Positivo</strong>
+                        <small>#d1f3e9 bg, #065f46 text</small>
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-preview">
+                        <span class="badge badge-warning">Pendiente</span>
+                    </div>
+                    <div class="component-label">
+                        <strong>Advertencia</strong>
+                        <small>#fef3c7 bg, #92400e text</small>
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-preview">
+                        <span class="badge badge-error">En Mora</span>
+                    </div>
+                    <div class="component-label">
+                        <strong>Error / Negativo</strong>
+                        <small>#fee2e2 bg, #991b1b text</small>
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-preview">
+                        <span class="badge badge-info">Disponible</span>
+                    </div>
+                    <div class="component-label">
+                        <strong>Información</strong>
+                        <small>#dbeafe bg, #1e40af text</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== INPUTS ==================== -->
+        <div class="section">
+            <h2 class="section-title">📝 Campos de Entrada</h2>
+
+            <div class="component-grid">
+                <div class="component">
+                    <div class="component-preview" style="padding: 16px; align-items: flex-start;">
+                        <div style="width: 100%;">
+                            <label class="form-label">Correo Electrónico</label>
+                            <input type="email" class="form-input" placeholder="usuario@ejemplo.com">
+                        </div>
+                    </div>
+                    <div class="component-code">
+.form-input {
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.form-input:focus {
+  border-color: #1b4a3a;
+  box-shadow: 0 0 0 3px rgba(...);
+}
+                    </div>
+                    <div class="component-label">
+                        <strong>Input Estándar</strong>
+                        <small>Con label y focus state</small>
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-preview" style="padding: 16px; align-items: flex-start;">
+                        <div style="width: 100%;">
+                            <label class="form-label">Unidad (Solo lectura)</label>
+                            <input type="text" class="form-input" value="Apt. 301" disabled style="background: #f9fafb; color: #9ca3af; cursor: not-allowed;">
+                        </div>
+                    </div>
+                    <div class="component-label">
+                        <strong>Input Deshabilitado</strong>
+                        <small>Para campos no editables</small>
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-preview" style="padding: 16px; align-items: flex-start;">
+                        <div style="width: 100%;">
+                            <label class="form-label">Motivo (Opcional)</label>
+                            <textarea class="form-input" style="resize: vertical; min-height: 80px; font-family: inherit;" placeholder="Escribe aquí..."></textarea>
+                        </div>
+                    </div>
+                    <div class="component-label">
+                        <strong>Textarea</strong>
+                        <small>Para contenido multilinea</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CARDS ==================== -->
+        <div class="section">
+            <h2 class="section-title">🎴 Cards</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div class="card">
+                    <div class="card-title">📊 Métrica Card</div>
+                    <div class="card-text">
+                        <div style="font-size: 28px; color: #1b4a3a; font-weight: 700; margin: 12px 0;">24</div>
+                        <small style="color: #9ca3af;">Reservas esta semana</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎪 Espacio Card</div>
+                    <div style="height: 80px; background: linear-gradient(135deg, #1b4a3a 0%, #2d6a5a 100%); border-radius: 6px; margin: 12px 0; display: flex; align-items: center; justify-content: center; font-size: 36px;">🎪</div>
+                    <div class="card-text">
+                        <small>Salón Comunal · 80 pers · 08:00-22:00</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">✅ Info Card</div>
+                    <div class="card-text">
+                        <strong style="color: #1b4a3a;">Unidad:</strong> Apt. 301<br>
+                        <strong style="color: #1b4a3a;">Estado:</strong> <span style="color: #065f46;">Al día</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL BASE ==================== -->
+        <div class="section">
+            <h2 class="section-title">🪟 Modal Base</h2>
+            <p class="section-subtitle">Estructura estándar para todos los modales de perfil</p>
+
+            <div class="modal-preview">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h3>Editar [Rol]</h3>
+                        <span style="cursor: pointer; font-size: 20px; color: #6b7280;">✕</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label">Campo de Ejemplo</label>
+                            <input type="text" class="form-input" placeholder="Valor...">
+                        </div>
+                        <p style="font-size: 13px; color: #6b7280; line-height: 1.5;">
+                            ✓ Ancho fijo: 560px en desktop, 100% en mobile<br>
+                            ✓ Max-height: 90vh con scroll interno<br>
+                            ✓ Todos los 7 modales usan este mismo contenedor
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary btn-sm">Cancelar</button>
+                        <button class="btn btn-primary btn-sm">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+/* Estructura HTML */
+&lt;div class="modal"&gt;
+  &lt;div class="modal-header"&gt;...&lt;/div&gt;
+  &lt;div class="modal-body"&gt;...&lt;/div&gt;
+  &lt;div class="modal-footer"&gt;...&lt;/div&gt;
+&lt;/div&gt;
+
+/* Estilos CSS */
+.modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  max-width: 560px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  background: #fafbfc;
+  position: sticky;
+  bottom: 0;
+}
+            </div>
+        </div>
+
+        <!-- ==================== TABLA ==================== -->
+        <div class="section">
+            <h2 class="section-title">📋 Tabla (Data Grid)</h2>
+
+            <div style="overflow-x: auto; margin-top: 20px;">
+                <table class="table-demo">
+                    <thead>
+                        <tr>
+                            <th>Residente</th>
+                            <th>Unidad</th>
+                            <th>Espacio</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong style="color: #1b4a3a;">Juan Pérez</strong></td>
+                            <td>Apt. 301</td>
+                            <td>Salón Comunal</td>
+                            <td>15 Abr, 14:00</td>
+                            <td><span class="badge badge-warning">Pendiente</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: #1b4a3a;">María López</strong></td>
+                            <td>Apt. 402</td>
+                            <td>BBQ</td>
+                            <td>14 Abr, 17:00</td>
+                            <td><span class="badge badge-success">Confirmada</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="code-block">
+/* Estilos de tabla */
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table th {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+}
+            </div>
+        </div>
+
+        <!-- ==================== ESPACIADO ==================== -->
+        <div class="section">
+            <h2 class="section-title">📏 Sistema de Espaciado</h2>
+            <p class="section-subtitle">Escala de 4px para mantener consistencia visual</p>
+
+            <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e5e7eb; margin-top: 20px;">
+                <table class="table-demo" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <th>Escala</th>
+                            <th>Pixeles</th>
+                            <th>Uso Típico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>xs</td>
+                            <td>4px</td>
+                            <td>Espacios muy pequeños entre elementos</td>
+                        </tr>
+                        <tr>
+                            <td>sm</td>
+                            <td>8px</td>
+                            <td>Espaciado entre íconos y texto</td>
+                        </tr>
+                        <tr>
+                            <td>md</td>
+                            <td>12px</td>
+                            <td>Padding en badges, espacios entre items</td>
+                        </tr>
+                        <tr>
+                            <td>lg</td>
+                            <td>16px</td>
+                            <td>Padding en inputs, espacios entre secciones</td>
+                        </tr>
+                        <tr>
+                            <td>xl</td>
+                            <td>20px</td>
+                            <td>Padding en cards, headers</td>
+                        </tr>
+                        <tr>
+                            <td>2xl</td>
+                            <td>24px</td>
+                            <td>Padding en modales, espacios principales</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ==================== BORDES Y SOMBRAS ==================== -->
+        <div class="section">
+            <h2 class="section-title">🎨 Radios de Borde y Sombras</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+                <div style="background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 6px; text-align: center;">
+                    <div style="width: 60px; height: 60px; background: #1b4a3a; border-radius: 6px; margin: 0 auto 10px;"></div>
+                    <small style="color: #6b7280;"><strong>border-radius: 6px</strong><br>Inputs, buttons</small>
+                </div>
+
+                <div style="background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px; text-align: center;">
+                    <div style="width: 60px; height: 60px; background: #1b4a3a; border-radius: 10px; margin: 0 auto 10px;"></div>
+                    <small style="color: #6b7280;"><strong>border-radius: 10px</strong><br>Cards</small>
+                </div>
+
+                <div style="background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px; text-align: center;">
+                    <div style="width: 60px; height: 60px; background: #1b4a3a; border-radius: 12px; margin: 0 auto 10px;"></div>
+                    <small style="color: #6b7280;"><strong>border-radius: 12px</strong><br>Modales</small>
+                </div>
+
+                <div style="background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 50%; text-align: center;">
+                    <div style="width: 60px; height: 60px; background: #1b4a3a; border-radius: 50%; margin: 0 auto 10px;"></div>
+                    <small style="color: #6b7280;"><strong>border-radius: 50%</strong><br>Avatar</small>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 24px; border-radius: 10px; border: 1px solid #e5e7eb; margin-top: 24px;">
+                <h3 style="font-size: 16px; color: #1b4a3a; margin-bottom: 16px; font-weight: 700;">Shadow System</h3>
+                <table class="table-demo" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <th>Nivel</th>
+                            <th>Box-shadow</th>
+                            <th>Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sutil</td>
+                            <td><code style="font-size: 11px;">0 1px 3px rgba(0,0,0,0.05)</code></td>
+                            <td>Cards, inputs mínimos</td>
+                        </tr>
+                        <tr>
+                            <td>Medio</td>
+                            <td><code style="font-size: 11px;">0 4px 12px rgba(27,74,58,0.3)</code></td>
+                            <td>Botones hover</td>
+                        </tr>
+                        <tr>
+                            <td>Alto</td>
+                            <td><code style="font-size: 11px;">0 8px 32px rgba(0,0,0,0.12)</code></td>
+                            <td>Modales, dropdowns</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ==================== CHECKLIST DE IMPLEMENTACIÓN ==================== -->
+        <div class="section">
+            <h2 class="section-title">✅ Checklist de Implementación</h2>
+
+            <div style="background: white; padding: 24px; border-radius: 10px; border: 1px solid #e5e7eb; margin-top: 20px;">
+                <h3 style="font-size: 16px; color: #1b4a3a; margin-bottom: 16px; font-weight: 700;">Módulo 1: Perfil</h3>
+                <ul style="list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                    <li>✅ Modal base con estructura común</li>
+                    <li>✅ Avatar editable (círculo 72px)</li>
+                    <li>✅ 7 variantes por rol</li>
+                    <li>✅ Campos con íconos Lucide</li>
+                    <li>✅ Campos de solo lectura (gris)</li>
+                    <li>✅ Badges de estado (colores semánticos)</li>
+                    <li>✅ Separadores y subtítulos</li>
+                    <li>✅ Botones Cancelar/Guardar sticky</li>
+                    <li>✅ Focus states en inputs</li>
+                    <li>✅ Responsive (100% en mobile)</li>
+                </ul>
+
+                <h3 style="font-size: 16px; color: #1b4a3a; margin-top: 24px; margin-bottom: 16px; font-weight: 700;">Módulo 2: Reservas</h3>
+                <ul style="list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                    <li>✅ Vista Super Admin: 4 métricas</li>
+                    <li>✅ Cards de espacios con estado</li>
+                    <li>✅ Filtros por espacio/fecha/estado</li>
+                    <li>✅ Tabla de reservas activas</li>
+                    <li>✅ Vista Propietario: selector de espacios</li>
+                    <li>✅ Calendar picker de fecha</li>
+                    <li>✅ Time slots (hora)</li>
+                    <li>✅ Mis reservas (sidebar)</li>
+                    <li>✅ Vista Seguridad: checklist del día</li>
+                    <li>✅ Botones Ingresó / No se presentó</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div style="text-align: center; padding: 40px 0; border-top: 1px solid #e5e7eb; margin-top: 60px; color: #6b7280; font-size: 13px;">
+            <p>🎨 Diseño System Bunty v1.0 | Última actualización: Abril 2026 | Compatible con Lucide Icons + Inter Font</p>
+        </div>
+    </div>
+</body>
+</html>

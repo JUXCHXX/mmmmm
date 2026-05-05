@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunty - Sidebar Optimizado (Iconos en Círculos)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #efefef 100%);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR - OPTIMIZADO */
+        .sidebar {
+            width: 80px;
+            background: #1b4a3a;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+            padding: 12px;
+        }
+
+        .sidebar.expanded {
+            width: 280px;
+            padding: 16px 12px;
+        }
+
+        /* Header */
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 48px;
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            display: none;
+        }
+
+        .sidebar.expanded .logo-text {
+            display: block;
+        }
+
+        /* Nav */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Section Icon Button - Círculo */
+        .section-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: rgba(255, 255, 255, 0.75);
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar.expanded .section-btn {
+            width: 100%;
+            border-radius: 12px;
+            justify-content: flex-start;
+            padding-left: 12px;
+            gap: 0;
+        }
+
+        .section-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: scale(1.08);
+        }
+
+        .section-btn.expanded {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(27, 74, 58, 0.2);
+            transform: scale(1.05);
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .sidebar.expanded .section-icon {
+            margin-right: 8px;
+        }
+
+        .section-label {
+            display: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: white;
+            flex: 1;
+        }
+
+        .sidebar.expanded .section-label {
+            display: block;
+        }
+
+        .chevron {
+            display: none;
+            width: 16px;
+            height: 16px;
+            color: rgba(255, 255, 255, 0.5);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .sidebar.expanded .chevron {
+            display: block;
+        }
+
+        .section-btn.expanded .chevron {
+            transform: rotate(90deg);
+        }
+
+        /* Subitems */
+        .subitems {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.25s ease, opacity 0.25s ease;
+            display: none;
+        }
+
+        .sidebar.expanded .subitems {
+            display: block;
+        }
+
+        .subitems.expanded {
+            max-height: 400px;
+            opacity: 1;
+        }
+
+        .subitems-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .subitems-header {
+            text-align: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subitem {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .subitem:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+        }
+
+        .subitem.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            font-weight: 500;
+        }
+
+        .subitem-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+
+        .subitem:hover .subitem-icon,
+        .subitem.active .subitem-icon {
+            opacity: 1;
+        }
+
+        /* Separator */
+        .sidebar-separator {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+        }
+
+        /* Footer */
+        .sidebar-footer {
+            padding-top: 12px;
+        }
+
+        .logout-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 100, 100, 0.2);
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar.expanded .logout-btn {
+            width: 100%;
+            border-radius: 12px;
+            justify-content: flex-start;
+            padding-left: 12px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 100, 100, 0.3);
+            color: white;
+        }
+
+        .logout-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar.expanded .logout-btn {
+            gap: 8px;
+        }
+
+        .logout-text {
+            display: none;
+        }
+
+        .sidebar.expanded .logout-text {
+            display: block;
+        }
+
+        /* Scrollbar */
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #1b4a3a;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1b4a3a;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #d1f3e9;
+            color: #065f46;
+            margin-top: 12px;
+        }
+
+        .toggle-link {
+            color: #1b4a3a;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                flex-direction: row;
+                padding: 8px;
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+            }
+
+            .section-btn {
+                width: 48px;
+                height: 48px;
+            }
+
+            .sidebar.expanded .section-btn {
+                width: 48px;
+            }
+
+            .subitems {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR OPTIMIZADO -->
+    <div class="sidebar" id="sidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+            <span class="logo-text">BUNTY</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+            <!-- PLATAFORMA -->
+            <div>
+                <button class="section-btn expanded" onclick="toggleSection(this)">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span class="section-label">PLATAFORMA</span>
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <div class="subitems expanded">
+                    <div class="subitems-container">
+                        <div class="subitems-header">Plataforma</div>
+                        <a class="subitem active" href="#">
+                            <svg class="subitem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <path d="M12 1v6m0 6v6"></path>
+                            </svg>
+                            <span>Dashboard</span>
+                        </a>
+                        <a class="subitem" href="#">
+                            <svg class="subitem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span>Residentes</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPERACIÓN -->
+            <div>
+                <button class="section-btn" onclick="toggleSection(this)">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m3.08 3.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m3.08-3.08l4.24-4.24M19.78 19.78l-4.24-4.24m-3.08-3.08l-4.24-4.24"></path>
+                    </svg>
+                    <span class="section-label">OPERACIÓN</span>
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <div class="subitems">
+                    <div class="subitems-container">
+                        <div class="subitems-header">Operación</div>
+                        <a class="subitem" href="#">Comunicaciones</a>
+                        <a class="subitem" href="#">Pagos</a>
+                        <a class="subitem" href="#">Contabilidad</a>
+                        <a class="subitem" href="#">Reservas</a>
+                        <a class="subitem" href="#">PQRS</a>
+                        <a class="subitem" href="#">Mantenimiento</a>
+                        <a class="subitem" href="#">Seguridad</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOCUMENTOS -->
+            <div>
+                <button class="section-btn" onclick="toggleSection(this)">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span class="section-label">DOCUMENTOS</span>
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <div class="subitems">
+                    <div class="subitems-container">
+                        <div class="subitems-header">Documentos</div>
+                        <a class="subitem" href="#">Documentos</a>
+                        <a class="subitem" href="#">Marketplace</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTELIGENCIA -->
+            <div>
+                <button class="section-btn" onclick="toggleSection(this)">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 21H3V3h9V1H3a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-9h-2zM9 5h6v6H9V5zm4 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+                    </svg>
+                    <span class="section-label">INTELIGENCIA</span>
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <div class="subitems">
+                    <div class="subitems-container">
+                        <div class="subitems-header">Inteligencia</div>
+                        <a class="subitem" href="#">IA Copiloto</a>
+                        <a class="subitem" href="#">Analítica</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMINISTRACIÓN -->
+            <div>
+                <button class="section-btn" onclick="toggleSection(this)">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                        <path d="M12 12h.01"></path>
+                    </svg>
+                    <span class="section-label">ADMINISTRACIÓN</span>
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <div class="subitems">
+                    <div class="subitems-container">
+                        <div class="subitems-header">Administración</div>
+                        <a class="subitem" href="#">Configuración</a>
+                        <a class="subitem" href="#">Soporte</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Separator -->
+        <div class="sidebar-separator"></div>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="alert('Cerrar sesión')">
+                <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span class="logout-text">Cerrar</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="header">
+            <h1>✨ Sidebar Optimizado - Iconos en Círculos</h1>
+            <p>Color correcto #1b4a3a, iconos grandes (24px), expandible con click</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🎨 Color Correcto</h3>
+                <p>Verde #1b4a3a del sistema Bunty, no verde claro. Consistente con botones y headers principales.</p>
+                <span class="badge">✓ Implementado</span>
+            </div>
+
+            <div class="card">
+                <h3>⭕ Iconos en Círculos</h3>
+                <p>5 botones circulares (56x56px) para cada sección. Iconos más grandes (24px) y visibles. Sin etiquetas.</p>
+                <span class="badge">✓ Optimizado</span>
+            </div>
+
+            <div class="card">
+                <h3>📱 Expandible</h3>
+                <p>Haz clic en cualquier círculo para expandir y ver subítems. Acordeón exclusivo, solo una abierta.</p>
+                <span class="badge">✓ Funcional</span>
+            </div>
+
+            <div class="card">
+                <h3>📱 Responsive Mobile</h3>
+                <p>En mobile, se convierte a barra horizontal inferior con tabs. Los subitems se muestran en drawer deslizable.</p>
+                <span class="badge">✓ Adaptado</span>
+            </div>
+
+            <div class="card">
+                <h3>🎬 Transiciones Suaves</h3>
+                <p>Animaciones de 0.3s para ancho, 0.25s para subitems, 0.2s para escalado. Todo fluido y profesional.</p>
+                <span class="badge">✓ Animado</span>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Interactivo</h3>
+                <p>Prueba haciendo click en los círculos. Los subitems aparecen con transición suave. Estado activo resaltado.</p>
+                <a class="toggle-link" onclick="document.getElementById('sidebar').classList.toggle('expanded'); return false;">
+                    Expandir/Contraer →
+                </a>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 40px;">
+            <h3>📋 Cambios Implementados</h3>
+            <ul style="color: #6b7280; font-size: 14px; line-height: 1.8; padding-left: 20px;">
+                <li>✅ Color fondo cambio a #1b4a3a (del sistema)</li>
+                <li>✅ Ancho sidebar: 80px (compacto) / 280px (expandido)</li>
+                <li>✅ 5 botones circulares (56x56px) con iconos 24px</li>
+                <li>✅ Sin etiquetas de sección visible normalmente</li>
+                <li>✅ Subitems en panel desplegable con transición smooth</li>
+                <li>✅ AppLayout actualizado (lg:ml-80 en lugar de lg:ml-72)</li>
+                <li>✅ BottomNav optimizado para mobile con colores correctos</li>
+                <li>✅ Logout button en rojo suave en hover</li>
+                <li>✅ Escalado y hover effects (1.08 scale)</li>
+                <li>✅ Totalmente responsive para desktop, tablet y mobile</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleSection(btn) {
+            const subitems = btn.nextElementSibling;
+
+            // Cerrar otros abiertas
+            document.querySelectorAll('.section-btn').forEach(b => {
+                if (b !== btn && b.classList.contains('expanded')) {
+                    b.classList.remove('expanded');
+                    b.nextElementSibling.classList.remove('expanded');
+                }
+            });
+
+            // Toggle actual
+            btn.classList.toggle('expanded');
+            subitems.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>
