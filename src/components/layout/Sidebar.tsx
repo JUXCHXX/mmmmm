@@ -25,7 +25,7 @@ const Sidebar = () => {
   let modules = getModulesForRole(user.roleId);
 
   if (user.roleId === 'super_admin') {
-    modules = modules.filter((m) => !['properties', 'knowledge', 'audit'].includes(m.id));
+    modules = modules.filter((m) => !['knowledge', 'audit'].includes(m.id));
   }
 
   const handleLogout = () => {

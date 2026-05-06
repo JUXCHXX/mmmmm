@@ -7,7 +7,7 @@
 import type { FeatureId } from '@/types/features';
 import type { RoleId, AccessLevel } from '@/types/roles';
 import { FEATURE_ACCESS_MATRIX, FEATURE_TO_MODULE, getFeaturesForRole } from '@/constants/featureAccessMatrix';
-import { FEATURES_BY_MODULE } from '@/types/features';
+import { FEATURES_BY_MODULE } from '@/constants/featureCatalog';
 
 /**
  * Generate a feature access report for a specific role
@@ -166,9 +166,7 @@ export function complianceCheck() {
   });
 
   // Rule 3: P3 should never have FULL_ACCESS to financial features
-  const financialFeatures = Object.keys(FEATURES_BY_MODULE.M04).concat(
-    Object.keys(FEATURES_BY_MODULE.M05)
-  );
+  const financialFeatures = (FEATURES_BY_MODULE.M04 ?? []).concat(FEATURES_BY_MODULE.M05 ?? []);
   Object.entries(FEATURE_ACCESS_MATRIX).forEach(([featureId, accesses]) => {
     if (financialFeatures.includes(featureId) && accesses.consejo === 'FULL_ACCESS') {
       issues.push({

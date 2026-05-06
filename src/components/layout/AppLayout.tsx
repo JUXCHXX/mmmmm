@@ -1,14 +1,38 @@
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useEffect } from 'react';
 import TopBar from './TopBar';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import { ACTIVE_CONDO_NAME } from '@/constants/branding';
+import ModuleFeatureHub from '@/components/ModuleFeatureHub';
+import type { ModuleId } from '@/types/modules';
+
+const MODULE_ROUTE_MAP: Array<{ prefix: string; moduleId: ModuleId }> = [
+  { prefix: '/propiedades', moduleId: 'properties' },
+  { prefix: '/residentes', moduleId: 'residents' },
+  { prefix: '/comunicaciones', moduleId: 'communications' },
+  { prefix: '/pagos', moduleId: 'payments' },
+  { prefix: '/contabilidad', moduleId: 'accounting' },
+  { prefix: '/reservas', moduleId: 'reservations' },
+  { prefix: '/pqrs', moduleId: 'pqrs' },
+  { prefix: '/mantenimiento', moduleId: 'maintenance' },
+  { prefix: '/seguridad', moduleId: 'security' },
+  { prefix: '/documentos', moduleId: 'documents' },
+  { prefix: '/marketplace', moduleId: 'marketplace' },
+  { prefix: '/ia-copiloto', moduleId: 'ai_copilot' },
+  { prefix: '/analitica', moduleId: 'analytics' },
+  { prefix: '/configuracion', moduleId: 'settings' },
+  { prefix: '/soporte', moduleId: 'support' },
+  { prefix: '/inicio', moduleId: 'dashboard' },
+];
 
 const AppLayout = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
+  const location = useLocation();
+
+  const currentModule = MODULE_ROUTE_MAP.find((route) => location.pathname.startsWith(route.prefix))?.moduleId;
 
   // Force re-render cuando cambia user (role switch)
   useEffect(() => {
@@ -49,6 +73,8 @@ const AppLayout = () => {
           )}
 
           <Outlet />
+
+          {currentModule && <ModuleFeatureHub moduleId={currentModule} />}
         </div>
       </main>
     </div>

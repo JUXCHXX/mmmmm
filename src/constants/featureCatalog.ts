@@ -1,0 +1,346 @@
+import type { AccessLevel, RoleId } from '@/types/roles';
+import type { FeatureDefinition, FeatureId, FeaturePreset } from '@/types/features';
+import { MODULE_CODES } from '@/types/features';
+
+type FeatureModuleId =
+  | 'properties'
+  | 'residents'
+  | 'communications'
+  | 'payments'
+  | 'accounting'
+  | 'reservations'
+  | 'pqrs'
+  | 'maintenance'
+  | 'security'
+  | 'documents'
+  | 'marketplace'
+  | 'dashboard'
+  | 'ai_copilot'
+  | 'analytics'
+  | 'settings'
+  | 'support';
+
+type AccessShort = 'C' | 'R' | 'P' | 'N';
+
+const ACCESS_MAP: Record<AccessShort, AccessLevel> = {
+  C: 'FULL_ACCESS',
+  R: 'READ_ONLY',
+  P: 'LIMITED',
+  N: 'NONE',
+};
+
+const DEFAULT_PRESET: Record<FeatureModuleId, FeaturePreset> = {
+  properties: 'catalog',
+  residents: 'catalog',
+  communications: 'communication',
+  payments: 'finance',
+  accounting: 'finance',
+  reservations: 'reservation',
+  pqrs: 'ticket',
+  maintenance: 'maintenance',
+  security: 'security',
+  documents: 'documents',
+  marketplace: 'marketplace',
+  dashboard: 'insights',
+  ai_copilot: 'ai',
+  analytics: 'insights',
+  settings: 'settings',
+  support: 'support',
+};
+
+const acl = (
+  superAdmin: AccessShort,
+  admin: AccessShort,
+  consejo: AccessShort,
+  propietario: AccessShort,
+  arrendatario: AccessShort,
+  porteria: AccessShort,
+  proveedor: AccessShort,
+): Record<RoleId, AccessLevel> => ({
+  super_admin: ACCESS_MAP[superAdmin],
+  admin: ACCESS_MAP[admin],
+  consejo: ACCESS_MAP[consejo],
+  propietario: ACCESS_MAP[propietario],
+  arrendatario: ACCESS_MAP[arrendatario],
+  porteria: ACCESS_MAP[porteria],
+  proveedor: ACCESS_MAP[proveedor],
+});
+
+const f = (
+  moduleId: FeatureModuleId,
+  id: FeatureId,
+  label: string,
+  access: Record<RoleId, AccessLevel>,
+  preset: FeaturePreset = DEFAULT_PRESET[moduleId],
+): FeatureDefinition => ({
+  id,
+  label,
+  moduleId,
+  moduleCode: MODULE_CODES[moduleId],
+  description: `Demo frontend funcional de ${label} con datos mock y control por perfil.`,
+  preset,
+  access,
+});
+
+export const FEATURE_CATALOG: Record<FeatureModuleId, FeatureDefinition[]> = {
+  properties: [
+    f('properties', 'm01_parking_storage_entities', 'Gestión de parqueaderos y depósitos como entidades propias', acl('C', 'C', 'R', 'P', 'N', 'P', 'N')),
+    f('properties', 'm01_hierarchy_tree', 'Árbol jerárquico: conjunto > torre > piso > unidad', acl('C', 'C', 'R', 'R', 'N', 'N', 'N')),
+    f('properties', 'm01_occupancy_traceability', 'Trazabilidad histórica de ocupación por unidad', acl('C', 'C', 'R', 'P', 'N', 'N', 'N')),
+    f('properties', 'm01_unit_master_record', 'Ficha maestra de la unidad', acl('C', 'C', 'R', 'P', 'P', 'N', 'N')),
+    f('properties', 'm01_unit_assets_relationship', 'Relación entre unidad y activos asignados', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('properties', 'm01_unit_destination_classification', 'Clasificación de unidad por destino: residencial, comercial, mixto', acl('C', 'C', 'R', 'R', 'N', 'N', 'N')),
+    f('properties', 'm01_unit_restriction_alerts', 'Alertas por unidad bloqueada o con restricciones', acl('C', 'C', 'R', 'P', 'P', 'P', 'N')),
+    f('properties', 'm01_bulk_structure_upload', 'Carga masiva de estructura inmobiliaria', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('properties', 'm01_excel_csv_import', 'Importación desde Excel/CSV', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('properties', 'm01_coefficients_config', 'Configuración de coeficientes y participación', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('properties', 'm01_visual_map', 'Mapa o plano visual del conjunto', acl('C', 'C', 'R', 'R', 'R', 'N', 'N')),
+  ],
+  residents: [
+    f('residents', 'm02_family_nucleus', 'Núcleo familiar y relaciones entre ocupantes', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('residents', 'm02_resident_documents', 'Gestión documental por residente', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('residents', 'm02_identity_validation', 'Validación de identidad', acl('C', 'C', 'N', 'N', 'N', 'P', 'N')),
+    f('residents', 'm02_document_expiration', 'Vencimiento de documentos', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('residents', 'm02_resident_history_by_unit', 'Historial de residentes por unidad', acl('C', 'C', 'R', 'P', 'N', 'N', 'N')),
+    f('residents', 'm02_owner_tenant_authorization', 'Autorización diferenciada entre propietario y arrendatario', acl('C', 'C', 'N', 'P', 'N', 'N', 'N')),
+    f('residents', 'm02_access_delegations', 'Delegaciones de acceso', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('residents', 'm02_special_conditions_registry', 'Registro de personas con movilidad reducida o condiciones especiales, si política lo permite', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('residents', 'm02_emergency_contacts', 'Perfiles de emergencia / contactos prioritarios', acl('C', 'C', 'N', 'P', 'P', 'P', 'N')),
+    f('residents', 'm02_resident_onboarding', 'Onboarding digital de nuevos residentes', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+  ],
+  communications: [
+    f('communications', 'm03_surveys_polls', 'Encuestas y sondeos', acl('C', 'C', 'P', 'P', 'P', 'N', 'N')),
+    f('communications', 'm03_digital_voting', 'Votaciones digitales', acl('C', 'C', 'P', 'P', 'P', 'N', 'N')),
+    f('communications', 'm03_community_calendar', 'Calendario comunitario', acl('C', 'C', 'R', 'R', 'R', 'N', 'N')),
+    f('communications', 'm03_campaign_scheduling', 'Programación de campañas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_advanced_segmentation', 'Segmentación avanzada', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_read_confirmation', 'Confirmación de lectura', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_controlled_reactions', 'Reacciones o interacción controlada', acl('C', 'C', 'P', 'P', 'P', 'N', 'N')),
+    f('communications', 'm03_comment_moderation', 'Moderación de comentarios', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_institutional_templates', 'Plantillas institucionales', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_open_engagement_analysis', 'Análisis de apertura y engagement', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_recurring_communications', 'Comunicaciones recurrentes automáticas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_auto_translation_configurable', 'Traducción automática configurable', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('communications', 'm03_announcements_library', 'Biblioteca de comunicados', acl('C', 'C', 'R', 'R', 'R', 'N', 'N')),
+  ],
+  payments: [
+    f('payments', 'm04_auto_payment_reconciliation', 'Conciliación automática de pagos', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_multichannel_collection', 'Recaudo multicanal', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_payment_agreements', 'Acuerdos de pago', acl('C', 'C', 'N', 'P', 'N', 'N', 'N')),
+    f('payments', 'm04_payment_promises', 'Promesas de pago', acl('C', 'C', 'N', 'P', 'N', 'N', 'N')),
+    f('payments', 'm04_blocking_by_mora', 'Bloqueo por mora según políticas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_collection_history', 'Historial de gestión de cobranza', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_aging_portfolio', 'Cartera por antigüedad', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_progressive_mora_notification', 'Notificación progresiva por mora', acl('C', 'C', 'N', 'R', 'N', 'N', 'N')),
+    f('payments', 'm04_refinancing_simulator', 'Simulador de refinanciación', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_campaign_collection', 'Recaudo extraordinario por campañas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_partial_payments', 'Pagos parciales', acl('C', 'C', 'N', 'P', 'N', 'N', 'N')),
+    f('payments', 'm04_credit_debit_notes', 'Notas crédito/débito', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_bank_integration', 'Integración bancaria', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_daily_collection_board', 'Tablero de recaudo diario', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_predictive_mora_alerts', 'Alertas predictivas de morosidad por unidad', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+  ],
+  accounting: [
+    f('accounting', 'm05_cost_centers', 'Centros de costo', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_budgets_execution', 'Presupuestos y ejecución presupuestal', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_basic_accrual', 'Manejo de causación básica', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_reconciliations', 'Conciliaciones', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_accounts_payable', 'Cuentas por pagar', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_integrated_receivables', 'Cuentas por cobrar integradas', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_assisted_month_close', 'Cierre mensual asistido', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_accounting_vouchers', 'Comprobantes contables', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_support_traceability', 'Trazabilidad de soporte contable', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_erp_integration_api', 'Integración con ERP/contabilidad externa vía API', acl('C', 'P', 'N', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_standard_exports', 'Exportaciones en formatos estándar contables', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('accounting', 'm05_pre_close_validations', 'Validaciones previas a cierres', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+  ],
+  reservations: [
+    f('reservations', 'm06_space_policies', 'Políticas por espacio', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('reservations', 'm06_user_quota_limits', 'Cupos máximos por usuario', acl('C', 'C', 'N', 'R', 'R', 'N', 'N')),
+    f('reservations', 'm06_visual_calendar', 'Calendario visual por recurso', acl('C', 'C', 'R', 'R', 'R', 'P', 'N')),
+    f('reservations', 'm06_mora_restrictions', 'Restricciones por mora', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('reservations', 'm06_payments_and_deposits', 'Pagos y depósitos asociados', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('reservations', 'm06_non_use_penalties', 'Penalizaciones por no uso', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('reservations', 'm06_waiting_list', 'Lista de espera', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('reservations', 'm06_rules_based_approval', 'Aprobación por reglas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('reservations', 'm06_special_hours', 'Configuración de horarios especiales', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('reservations', 'm06_maintenance_blocks', 'Bloqueo por mantenimiento', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('reservations', 'm06_check_in_out', 'Check-in/check-out', acl('C', 'C', 'N', 'P', 'P', 'P', 'N')),
+    f('reservations', 'm06_space_condition_evidence', 'Evidencia del estado del espacio', acl('C', 'C', 'N', 'N', 'N', 'P', 'N')),
+    f('reservations', 'm06_reservation_history', 'Historial de reservas por unidad', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('reservations', 'm06_space_usage_analytics', 'Analítica de uso de espacios', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+  ],
+  pqrs: [
+    f('pqrs', 'm07_trays_by_responsible', 'Bandejas por responsable', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('pqrs', 'm07_configurable_slas', 'SLAs configurables por categoría', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('pqrs', 'm07_due_dates_semaphores', 'Vencimientos y semáforos', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('pqrs', 'm07_escalation_rules', 'Reglas de escalamiento', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('pqrs', 'm07_auto_classification', 'Clasificación automática', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('pqrs', 'm07_suggested_responses', 'Base de respuestas sugeridas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('pqrs', 'm07_post_close_satisfaction', 'Satisfacción post-cierre', acl('C', 'C', 'R', 'P', 'P', 'N', 'N')),
+    f('pqrs', 'm07_case_reopening', 'Re-apertura de casos', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('pqrs', 'm07_full_traceability', 'Trazabilidad completa de interacciones', acl('C', 'C', 'R', 'P', 'P', 'N', 'N')),
+    f('pqrs', 'm07_internal_external_tickets', 'Tickets internos y externos', acl('C', 'C', 'R', 'P', 'P', 'N', 'N')),
+    f('pqrs', 'm07_linking_to_entities', 'Vinculación a unidad, residente o proveedor', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('pqrs', 'm07_recurrence_indicators', 'Indicadores de reincidencia', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('pqrs', 'm07_committee_parallel_flow', 'Comité de convivencia como flujo paralelo', acl('C', 'C', 'P', 'P', 'P', 'N', 'N')),
+    f('pqrs', 'm07_controlled_anonymity', 'Anonimato controlado para ciertos reportes', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+  ],
+  maintenance: [
+    f('maintenance', 'm08_asset_technical_sheet', 'Ficha técnica de activos', acl('C', 'C', 'R', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_serials_warranties_lifecycle', 'Seriales, garantías y vida útil', acl('C', 'C', 'R', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_asset_location', 'Ubicación del activo', acl('C', 'C', 'R', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_reference_depreciation', 'Depreciación referencial', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('maintenance', 'm08_intervention_history', 'Historial de intervenciones', acl('C', 'C', 'R', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_scheduled_preventive_maintenance', 'Mantenimiento preventivo programado', acl('C', 'C', 'R', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_work_orders', 'OT correctivas y preventivas', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_asset_checklists', 'Checklists por tipo de activo', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_accumulated_costs', 'Costos acumulados por activo', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('maintenance', 'm08_spare_parts_consumption', 'Consumo de repuestos', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_provider_evaluation', 'Evaluación de proveedores', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('maintenance', 'm08_before_after_evidence', 'Evidencias fotográficas antes/después', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_closure_signature', 'Firma de cierre', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('maintenance', 'm08_budget_vs_real', 'Presupuesto comparado vs real', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('maintenance', 'm08_renewal_alerts', 'Alertas de renovación o reemplazo', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+  ],
+  security: [
+    f('security', 'm09_digital_guard_log', 'Bitácora digital de portería', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_security_shifts', 'Turnos de seguridad', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_packages_mail', 'Paquetes y correspondencia', acl('C', 'C', 'N', 'P', 'P', 'C', 'N')),
+    f('security', 'm09_delivery_control', 'Control de domiciliarios', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_frequent_visitors', 'Visitantes frecuentes', acl('C', 'C', 'N', 'P', 'P', 'C', 'N')),
+    f('security', 'm09_blacklists_alerts', 'Listas negras o alertas', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_unit_blocks', 'Bloqueos por unidad', acl('C', 'C', 'N', 'N', 'N', 'P', 'N')),
+    f('security', 'm09_validation_methods', 'Validación por QR, placa, documento o PIN', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_real_time_alerts', 'Alertas en tiempo real', acl('C', 'C', 'N', 'P', 'P', 'C', 'N')),
+    f('security', 'm09_contractor_windows', 'Ingresos de contratistas con ventanas horarias', acl('C', 'C', 'N', 'N', 'N', 'C', 'P')),
+    f('security', 'm09_restricted_areas_access', 'Control de acceso a zonas restringidas', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_hardware_integration', 'Integración con hardware', acl('C', 'C', 'N', 'N', 'N', 'P', 'N')),
+    f('security', 'm09_express_gate_panel', 'Panel express para portería', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_ingress_evidence', 'Evidencias de ingreso', acl('C', 'C', 'N', 'N', 'N', 'C', 'N')),
+    f('security', 'm09_security_incident_tracking', 'Seguimiento de incidentes de seguridad', acl('C', 'C', 'R', 'N', 'N', 'C', 'N')),
+  ],
+  documents: [
+    f('documents', 'm10_document_approval_flows', 'Flujos de aprobación documental', acl('C', 'C', 'P', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_robust_version_control', 'Control de versiones robusto', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_metadata_taxonomies', 'Metadatos y taxonomías', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_document_expiration', 'Vencimiento de documentos', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_read_acknowledgement', 'Acuse de lectura', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_simple_signature', 'Firma electrónica simple', acl('C', 'C', 'P', 'P', 'N', 'N', 'N')),
+    f('documents', 'm10_fine_document_permissions', 'Permisos finos por tipo documental', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_profile_folders', 'Carpetas por perfil', acl('C', 'C', 'R', 'R', 'R', 'N', 'N')),
+    f('documents', 'm10_document_templates', 'Plantillas documentales', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_advanced_search', 'Búsqueda avanzada', acl('C', 'C', 'P', 'P', 'P', 'N', 'N')),
+    f('documents', 'm10_document_ocr', 'OCR si llegan documentos escaneados', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('documents', 'm10_related_entities', 'Relación con actas, PQRS, proveedores, contratos y mantenimiento', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+  ],
+  marketplace: [
+    f('marketplace', 'm11_service_agenda', 'Agenda de servicios', acl('C', 'C', 'N', 'P', 'P', 'N', 'P')),
+    f('marketplace', 'm11_quote_requests', 'Solicitud de cotizaciones', acl('C', 'C', 'N', 'P', 'P', 'N', 'P')),
+    f('marketplace', 'm11_provider_comparison', 'Comparativo de proveedores', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('marketplace', 'm11_performance_ranking', 'Ranking de desempeño', acl('C', 'C', 'R', 'N', 'N', 'N', 'P')),
+    f('marketplace', 'm11_verified_reviews', 'Reseñas verificadas', acl('C', 'C', 'N', 'P', 'P', 'N', 'R')),
+    f('marketplace', 'm11_segmented_promotions', 'Promociones geolocalizadas o segmentadas', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('marketplace', 'm11_paid_provider_campaigns', 'Campañas pagas de proveedores', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('marketplace', 'm11_categories_subcategories', 'Categorías y subcategorías', acl('C', 'C', 'N', 'R', 'R', 'N', 'R')),
+    f('marketplace', 'm11_provider_leads', 'Gestión de leads para proveedores', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('marketplace', 'm11_commission_system', 'Sistema de comisión', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('marketplace', 'm11_in_platform_payments', 'Pagos dentro de la plataforma', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('marketplace', 'm11_commercial_dashboard', 'Dashboard comercial del marketplace', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('marketplace', 'm11_provider_document_validation', 'Validación documental del proveedor', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('marketplace', 'm11_service_traceability', 'Trazabilidad de servicio contratado', acl('C', 'C', 'N', 'P', 'N', 'N', 'P')),
+  ],
+  dashboard: [
+    f('dashboard', 'm12_priority_alerts', 'Alertas prioritarias', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_historical_comparatives', 'Comparativos históricos', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_daily_weekly_summary', 'Resumen diario/semanal', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_drill_down_by_module', 'Drill-down por módulo', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_risk_ranking', 'Ranking de riesgos', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_operational_heatmap', 'Mapa de calor operativo', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_pending_tasks', 'Panel de tareas pendientes', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_sla_semaphores', 'Semáforos por SLA', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_portfolio_board', 'Tablero de cartera', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_security_board', 'Tablero de seguridad', acl('C', 'C', 'N', 'N', 'N', 'P', 'N')),
+    f('dashboard', 'm12_maintenance_productivity', 'Productividad de mantenimiento', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('dashboard', 'm12_provider_status', 'Estado de proveedores', acl('C', 'C', 'N', 'N', 'N', 'N', 'P')),
+    f('dashboard', 'm12_digital_adoption', 'Adopción digital por residentes', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+  ],
+  ai_copilot: [
+    f('ai_copilot', 'm13_profile_copilot', 'Copiloto por perfil', acl('C', 'C', 'P', 'P', 'P', 'P', 'N')),
+    f('ai_copilot', 'm13_contextual_responses', 'Respuestas con contexto del conjunto', acl('C', 'C', 'P', 'P', 'P', 'P', 'N')),
+    f('ai_copilot', 'm13_draft_announcements', 'Generación de borradores de comunicados', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_pqrs_summary', 'Resumen de PQRS', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_action_recommendations', 'Recomendación de acciones', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_anomaly_analysis', 'Análisis de anomalías', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_cross_semantic_search', 'Búsqueda semántica transversal', acl('C', 'C', 'P', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_regulations_query', 'Consulta sobre reglamento/documentos', acl('C', 'C', 'P', 'P', 'P', 'N', 'N')),
+    f('ai_copilot', 'm13_gatehouse_support', 'Soporte a portería', acl('C', 'C', 'N', 'N', 'N', 'P', 'N')),
+    f('ai_copilot', 'm13_mora_prediction', 'Predicción de mora', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_maintenance_suggestions', 'Sugerencia de mantenimientos', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_complaint_patterns', 'Detección de patrones de queja', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_council_copilot', 'Copiloto para consejo', acl('C', 'C', 'P', 'N', 'N', 'N', 'N')),
+    f('ai_copilot', 'm13_basic_explainability', 'Explicabilidad básica de sugerencias IA', acl('C', 'C', 'P', 'N', 'N', 'N', 'N')),
+  ],
+  analytics: [
+    f('analytics', 'm14_dashboards_by_profile', 'Dashboards por perfil', acl('C', 'C', 'P', 'P', 'P', 'P', 'P')),
+    f('analytics', 'm14_report_builder', 'Constructor de reportes', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_advanced_filters', 'Filtros avanzados', acl('C', 'C', 'P', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_scheduled_reports', 'Reportes programados', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_condo_benchmarks', 'Benchmarks entre conjuntos', acl('C', 'P', 'N', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_multiformat_export', 'Exportación multi-formato', acl('C', 'C', 'P', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_drill_down', 'Drill-down', acl('C', 'C', 'P', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_financial_board', 'Tablero financiero', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_occupancy_analytics', 'Analítica de ocupación', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_communications_analytics', 'Analítica de comunicaciones', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_incident_analytics', 'Analítica de incidentes', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_provider_analytics', 'Analítica de proveedores', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_adoption_indicators', 'Indicadores de adopción del sistema', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('analytics', 'm14_predictive_indicators_ai', 'Indicadores predictivos con IA', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+  ],
+  settings: [
+    f('settings', 'm15_feature_flags', 'Feature flags', acl('C', 'N', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_module_activation', 'Activación/desactivación de módulos por cliente', acl('C', 'N', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_condo_templates', 'Plantillas por tipo de conjunto', acl('C', 'P', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_condo_branding', 'Branding por conjunto', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_notification_policies', 'Políticas de notificación', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_business_rules', 'Reglas de negocio configurables', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_calendars_holidays', 'Calendarios y festivos', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_multi_site', 'Multi-sede / multi-condominio', acl('C', 'P', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_multi_currency', 'Multi-moneda', acl('C', 'P', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_multi_language', 'Multi-idioma', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_approval_levels', 'Niveles de aprobación', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_visibility_policies', 'Políticas de visibilidad por perfil', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_master_states', 'Definición de estados maestros', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_master_catalogs', 'Catálogos maestros', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('settings', 'm15_integrations_config', 'Configuración de integraciones', acl('C', 'P', 'N', 'N', 'N', 'N', 'N')),
+  ],
+  support: [
+    f('support', 'm16_guided_onboarding', 'Onboarding guiado por perfil', acl('C', 'C', 'P', 'P', 'P', 'P', 'P')),
+    f('support', 'm16_product_tours', 'Tours dentro del producto', acl('C', 'C', 'P', 'P', 'P', 'P', 'P')),
+    f('support', 'm16_contextual_help', 'Centro de ayuda contextual', acl('C', 'C', 'P', 'P', 'P', 'P', 'P')),
+    f('support', 'm16_role_knowledge_base', 'Base de conocimiento por rol', acl('C', 'C', 'R', 'R', 'R', 'R', 'R')),
+    f('support', 'm16_help_chatbot', 'Chatbot de ayuda', acl('C', 'C', 'P', 'P', 'P', 'P', 'P')),
+    f('support', 'm16_short_videos', 'Videos cortos', acl('C', 'C', 'R', 'R', 'R', 'R', 'R')),
+    f('support', 'm16_priority_tickets', 'Tickets con prioridad', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('support', 'm16_support_tracking', 'Seguimiento de soporte', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('support', 'm16_platform_incidents', 'Estado de incidentes de plataforma', acl('C', 'C', 'R', 'R', 'R', 'R', 'N')),
+    f('support', 'm16_admin_training', 'Entrenamiento para administradores', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
+    f('support', 'm16_dynamic_faq', 'FAQ dinámico', acl('C', 'C', 'R', 'R', 'R', 'R', 'R')),
+    f('support', 'm16_screen_suggestions', 'Sugerencias automáticas según pantalla', acl('C', 'C', 'P', 'P', 'P', 'P', 'P')),
+  ],
+};
+
+export const ALL_FEATURES = Object.values(FEATURE_CATALOG).flat();
+
+export const FEATURE_BY_ID = Object.fromEntries(
+  ALL_FEATURES.map((feature) => [feature.id, feature]),
+) as Record<FeatureId, FeatureDefinition>;
+
+export const FEATURES_BY_MODULE = Object.entries(FEATURE_CATALOG).reduce(
+  (accumulator, [moduleId, features]) => {
+    const code = MODULE_CODES[moduleId as FeatureModuleId];
+    accumulator[code] = features.map((feature) => feature.id);
+    return accumulator;
+  },
+  {} as Record<string, FeatureId[]>,
+);

@@ -1,4 +1,7 @@
-import type { RoleId, AccessLevel } from './roles';
+import { FEATURE_ACCESS_MATRIX } from '@/constants/featureAccessMatrix';
+import { FEATURES_BY_MODULE } from '@/constants/featureCatalog';
+import type { AccessLevel, RoleId } from './roles';
+import { MODULE_CODES } from './features';
 
 export type ModuleId =
   | 'properties'
@@ -53,28 +56,68 @@ export const MODULES: ModuleConfig[] = [
   { id: 'audit', label: 'Auditoría y Logs', icon: 'BarChart3', path: '/auditoria-seguridad', category: 'advanced' },
 ];
 
-export const MODULE_ACCESS_MAP: Record< ModuleId, Record<RoleId, AccessLevel>> = {
-  dashboard:       { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'OWN_DATA_ONLY', arrendatario: 'OWN_DATA_ONLY', porteria: 'LIMITED', proveedor: 'FULL_ACCESS' },
-  properties:      { super_admin: 'NONE', admin: 'NONE', consejo: 'READ_ONLY', propietario: 'OWN_DATA_ONLY', arrendatario: 'OWN_DATA_ONLY', porteria: 'NONE', proveedor: 'NONE' },
-  residents:       { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'NONE', porteria: 'READ_ONLY', proveedor: 'NONE' },
-  communications:  { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'LIMITED', propietario: 'LIMITED', arrendatario: 'LIMITED', porteria: 'READ_ONLY', proveedor: 'NONE' },
-  payments:        { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'NONE', porteria: 'NONE', proveedor: 'NONE' },
-  accounting:      { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'NONE', porteria: 'NONE', proveedor: 'OWN_DATA_ONLY' },
-  reservations:    { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'LIMITED', porteria: 'FULL_ACCESS', proveedor: 'NONE' },
-  pqrs:            { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'LIMITED', porteria: 'NONE', proveedor: 'NONE' },
-  maintenance:     { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'READ_ONLY', arrendatario: 'READ_ONLY', porteria: 'READ_ONLY', proveedor: 'NONE' },
-  security:        { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'LIMITED', porteria: 'FULL_ACCESS', proveedor: 'NONE' },
-  security_control: { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'NONE', propietario: 'NONE', arrendatario: 'NONE', porteria: 'NONE', proveedor: 'NONE' },
-  security_config: { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'LIMITED', porteria: 'FULL_ACCESS', proveedor: 'NONE' },
-  documents:       { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'READ_ONLY', arrendatario: 'READ_ONLY', porteria: 'READ_ONLY', proveedor: 'FULL_ACCESS' },
-  marketplace:     { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'NONE', propietario: 'LIMITED', arrendatario: 'LIMITED', porteria: 'NONE', proveedor: 'NONE' },
-  ai_copilot:      { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'READ_ONLY', arrendatario: 'NONE', porteria: 'NONE', proveedor: 'NONE' },
-  analytics:       { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'OWN_DATA_ONLY', arrendatario: 'OWN_DATA_ONLY', porteria: 'NONE', proveedor: 'FULL_ACCESS' },
-  settings:        { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'READ_ONLY', propietario: 'LIMITED', arrendatario: 'LIMITED', porteria: 'NONE', proveedor: 'FULL_ACCESS' },
-  support:         { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'FULL_ACCESS', propietario: 'FULL_ACCESS', arrendatario: 'FULL_ACCESS', porteria: 'FULL_ACCESS', proveedor: 'FULL_ACCESS' },
-  knowledge:       { super_admin: 'NONE', admin: 'NONE', consejo: 'NONE', propietario: 'NONE', arrendatario: 'NONE', porteria: 'NONE', proveedor: 'NONE' },
-  audit:           { super_admin: 'FULL_ACCESS', admin: 'FULL_ACCESS', consejo: 'NONE', propietario: 'NONE', arrendatario: 'NONE', porteria: 'NONE', proveedor: 'NONE' },
+const ACCESS_ORDER: Record<AccessLevel, number> = {
+  NONE: 0,
+  OWN_DATA_ONLY: 1,
+  READ_ONLY: 2,
+  LIMITED: 3,
+  FULL_ACCESS: 4,
 };
+
+const ROLES: RoleId[] = [
+  'super_admin',
+  'admin',
+  'consejo',
+  'propietario',
+  'arrendatario',
+  'porteria',
+  'proveedor',
+];
+
+const DISABLED_DERIVED_MODULES = new Set<ModuleId>([
+  'security_control',
+  'security_config',
+  'knowledge',
+  'audit',
+]);
+
+const emptyAccessMap = (): Record<RoleId, AccessLevel> => ({
+  super_admin: 'NONE',
+  admin: 'NONE',
+  consejo: 'NONE',
+  propietario: 'NONE',
+  arrendatario: 'NONE',
+  porteria: 'NONE',
+  proveedor: 'NONE',
+});
+
+const getHighestAccess = (moduleId: ModuleId, roleId: RoleId): AccessLevel => {
+  if (DISABLED_DERIVED_MODULES.has(moduleId)) {
+    return 'NONE';
+  }
+
+  const moduleCode = MODULE_CODES[moduleId];
+  const featureIds = FEATURES_BY_MODULE[moduleCode] ?? [];
+
+  return featureIds.reduce<AccessLevel>((highest, featureId) => {
+    const current = FEATURE_ACCESS_MATRIX[featureId]?.[roleId] ?? 'NONE';
+    return ACCESS_ORDER[current] > ACCESS_ORDER[highest] ? current : highest;
+  }, 'NONE');
+};
+
+export const MODULE_ACCESS_MAP: Record<ModuleId, Record<RoleId, AccessLevel>> = MODULES.reduce(
+  (accumulator, module) => {
+    accumulator[module.id] = ROLES.reduce(
+      (roleMap, roleId) => {
+        roleMap[roleId] = getHighestAccess(module.id, roleId);
+        return roleMap;
+      },
+      emptyAccessMap(),
+    );
+    return accumulator;
+  },
+  {} as Record<ModuleId, Record<RoleId, AccessLevel>>,
+);
 
 export function getAccessLevel(moduleId: ModuleId, roleId: RoleId): AccessLevel {
   return MODULE_ACCESS_MAP[moduleId]?.[roleId] ?? 'NONE';
@@ -99,6 +142,5 @@ export function canDelete(moduleId: ModuleId, roleId: RoleId): boolean {
 }
 
 export function getModulesForRole(roleId: RoleId): ModuleConfig[] {
-  return MODULES.filter(m => hasAccess(m.id, roleId));
+  return MODULES.filter((module) => hasAccess(module.id, roleId));
 }
-

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore, type FeeConfig } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getAccessLevel } from '@/types/modules';
-import { CreditCard, DollarSign, AlertTriangle, CheckCircle, Clock, TrendingUp, FileText, Bot, Send, Settings2, Link2, Sparkles, X, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, TrendingDown, ReceiptText, Tag, Calendar, Percent, Mail, Copy, Scale, ClipboardList } from 'lucide-react';
+import { CreditCard, DollarSign, AlertTriangle, CheckCircle, Clock, TrendingUp, FileText, Bot, Send, Settings2, Link2, Sparkles, X, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, TrendingDown, ReceiptText, Tag, Calendar, Percent, Mail, Copy, Scale, ClipboardList, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import KpiCard from '@/components/dashboard/KpiCard';
 import { FloatingContainer } from '@/components/FloatingContainer';

@@ -377,8 +377,9 @@ const TicketsTab = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-[#0D2B4E]">Asunto *</label>
+                <label htmlFor="support-ticket-subject" className="text-sm font-semibold text-[#0D2B4E]">Asunto *</label>
                 <Input
+                  id="support-ticket-subject"
                   value={form.subject}
                   onChange={(e) => setForm({...form, subject: e.target.value})}
                   placeholder="Ej: Error al pagar con PSE"

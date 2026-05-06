@@ -174,7 +174,7 @@ const BottomNav = () => {
 
     const userModules =
       user.roleId === 'super_admin'
-        ? modules.filter((m) => !['properties', 'knowledge', 'audit'].includes(m.id))
+        ? modules.filter((m) => !['knowledge', 'audit'].includes(m.id))
         : modules;
 
     return SIDEBAR_SECTIONS.map((section) => ({
