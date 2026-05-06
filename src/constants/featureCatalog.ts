@@ -77,7 +77,7 @@ const f = (
   label,
   moduleId,
   moduleCode: MODULE_CODES[moduleId],
-  description: `Demo frontend funcional de ${label} con datos mock y control por perfil.`,
+  description: `Operacion disponible en la plataforma para ${label}.`,
   preset,
   access,
 });

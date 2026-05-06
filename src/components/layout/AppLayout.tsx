@@ -72,9 +72,9 @@ const AppLayout = () => {
             </div>
           )}
 
-          <Outlet />
-
           {currentModule && <ModuleFeatureHub moduleId={currentModule} />}
+
+          <Outlet />
         </div>
       </main>
     </div>

@@ -488,7 +488,7 @@ const AnalyticsPage = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} /> Actualizar
           </button>
           <button 
-            onClick={() => toast({ title: 'Exportación iniciada', description: 'El reporte se descargará en breve (demo)' })} 
+            onClick={() => toast({ title: 'Exportación iniciada', description: 'El reporte se descargará en breve' })} 
             className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[rgba(255,255,255,0.06)] text-muted-foreground hover:text-foreground flex items-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" /> Exportar
