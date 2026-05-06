@@ -24,14 +24,12 @@ const MODULE_ROUTE_MAP: Array<{ prefix: string; moduleId: ModuleId }> = [
   { prefix: '/analitica', moduleId: 'analytics' },
   { prefix: '/configuracion', moduleId: 'settings' },
   { prefix: '/soporte', moduleId: 'support' },
-  { prefix: '/inicio', moduleId: 'dashboard' },
 ];
 
 const AppLayout = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const location = useLocation();
-
   const currentModule = MODULE_ROUTE_MAP.find((route) => location.pathname.startsWith(route.prefix))?.moduleId;
 
   // Force re-render cuando cambia user (role switch)
@@ -72,9 +70,13 @@ const AppLayout = () => {
             </div>
           )}
 
-          {currentModule && <ModuleFeatureHub moduleId={currentModule} />}
-
           <Outlet />
+
+          {currentModule && (
+            <div className="mt-8 md:mt-10">
+              <ModuleFeatureHub moduleId={currentModule} />
+            </div>
+          )}
         </div>
       </main>
     </div>

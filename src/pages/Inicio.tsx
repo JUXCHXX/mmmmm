@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useAppStore } from '@/store/useAppStore';
 import KpiCard from '@/components/dashboard/KpiCard';
+import DashboardFeatureWorkbench from '@/components/dashboard/DashboardFeatureWorkbench';
 import HeroSection from '@/components/HeroSection';
 import QuickActions from '@/components/QuickActions';
 import { motion } from 'framer-motion';
@@ -97,6 +98,8 @@ const Inicio = () => {
         <KpiCard title="Ocupación" value={metrics.avgOccupancy} suffix="%" icon={<Home className="w-6 h-6" />} delay={300} />
         <KpiCard title="PQRS Abiertas" value={12} icon={<ClipboardList className="w-6 h-6" />} delay={400} />
       </div>
+
+      <DashboardFeatureWorkbench />
 
       {/* Charts - H3 uniforme */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

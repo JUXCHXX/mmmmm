@@ -8,14 +8,6 @@ import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
 import {
   ArrowRight,
   Bot,
@@ -106,25 +98,6 @@ const PRESET_CONTEXT: Record<FeaturePreset, string[]> = {
   ai: ['Consulta contextual', 'Respuesta generada', 'Sugerencia aplicada'],
   settings: ['Politica activa', 'Regla parametrizada', 'Cambio reciente'],
   support: ['Centro de ayuda', 'Ruta guiada', 'Incidente en seguimiento'],
-};
-
-const MODULE_TITLES: Partial<Record<ModuleId, string>> = {
-  properties: 'M01 - Gestion de propiedades y unidades',
-  residents: 'M02 - Gestion de residentes y censo',
-  communications: 'M03 - Comunicaciones y comunidad',
-  payments: 'M04 - Pagos, cartera y recaudo',
-  accounting: 'M05 - Contabilidad basica e integracion',
-  reservations: 'M06 - Reservas de zonas comunes',
-  pqrs: 'M07 - Gestion de PQRS y tickets',
-  maintenance: 'M08 - Gestion de mantenimiento y activos',
-  security: 'M09 - Seguridad y control de acceso',
-  documents: 'M10 - Gestion documental',
-  marketplace: 'M11 - Marketplace y servicios',
-  dashboard: 'M12 - Panel del Administrador',
-  ai_copilot: 'M13 - Modulo IA Copiloto PH',
-  analytics: 'M14 - Analitica, BI y reportes',
-  settings: 'M15 - Configuracion y parametrizacion',
-  support: 'M16 - Soporte, ayuda y centro de conocimiento',
 };
 
 const PRESET_ICONS: Record<FeaturePreset, typeof Layers> = {
@@ -250,6 +223,10 @@ const isHighlightedStatus = (status: string) => {
 };
 
 export const ModuleFeatureHub = ({ moduleId }: { moduleId: ModuleId }) => {
+  if (moduleId === 'dashboard') {
+    return null;
+  }
+
   const user = useAuthStore((state) => state.user);
   const roleId = user?.roleId ?? 'propietario';
   const moduleFeatures = (FEATURE_CATALOG as Partial<Record<ModuleId, FeatureDefinition[]>>)[moduleId] ?? [];
@@ -259,7 +236,6 @@ export const ModuleFeatureHub = ({ moduleId }: { moduleId: ModuleId }) => {
     [moduleFeatures, roleId],
   );
 
-  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedFeatureId, setSelectedFeatureId] = useState<FeatureId | null>(null);
   const [rowsByFeature, setRowsByFeature] = useState<Record<FeatureId, FeatureRecord[]>>({});
@@ -287,13 +263,17 @@ export const ModuleFeatureHub = ({ moduleId }: { moduleId: ModuleId }) => {
     accessibleFeatures.find((feature) => feature.id === selectedFeatureId) ?? accessibleFeatures[0];
 
   useEffect(() => {
-    if (!selectedFeature || rowsByFeature[selectedFeature.id]) return;
+    if (!selectedFeature) return;
 
-    setRowsByFeature((current) => ({
-      ...current,
-      [selectedFeature.id]: buildRows(selectedFeature, user?.name ?? 'usuario'),
-    }));
-  }, [rowsByFeature, selectedFeature, user?.name]);
+    setRowsByFeature((current) =>
+      current[selectedFeature.id]
+        ? current
+        : {
+            ...current,
+            [selectedFeature.id]: buildRows(selectedFeature, user?.name ?? 'usuario'),
+          },
+    );
+  }, [selectedFeature, user?.name]);
 
   if (!user || !moduleFeatures.length || !accessibleFeatures.length || !selectedFeature) {
     return null;
@@ -306,8 +286,6 @@ export const ModuleFeatureHub = ({ moduleId }: { moduleId: ModuleId }) => {
   const canDelete = accessLevel === 'FULL_ACCESS';
   const rows = rowsByFeature[selectedFeature.id] ?? buildRows(selectedFeature, user.name);
   const visibleRows = showOnlyHighlighted ? rows.filter((row) => isHighlightedStatus(row.status)) : rows;
-  const quickFeatures = accessibleFeatures.slice(0, 7);
-  const overflowCount = Math.max(accessibleFeatures.length - quickFeatures.length, 0);
   const PresetIcon = PRESET_ICONS[selectedFeature.preset];
 
   const updateRows = (updater: (currentRows: FeatureRecord[]) => FeatureRecord[]) => {
@@ -315,11 +293,6 @@ export const ModuleFeatureHub = ({ moduleId }: { moduleId: ModuleId }) => {
       ...current,
       [selectedFeature.id]: updater(current[selectedFeature.id] ?? buildRows(selectedFeature, user.name)),
     }));
-  };
-
-  const openFeature = (featureId: FeatureId) => {
-    setSelectedFeatureId(featureId);
-    setOpen(true);
   };
 
   const handleCreate = () => {
@@ -388,283 +361,209 @@ export const ModuleFeatureHub = ({ moduleId }: { moduleId: ModuleId }) => {
   };
 
   return (
-    <>
-      <section className="mb-6 rounded-[28px] border border-black/8 bg-white/90 p-4 shadow-sm backdrop-blur">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">{MODULE_TITLES[moduleId] ?? moduleId}</Badge>
-              <h2 className="text-base font-bold text-[#0D2654]">Funciones del modulo</h2>
-              <Badge variant="outline">{accessibleFeatures.length} visibles</Badge>
+    <section className="mb-6 overflow-hidden rounded-[34px] border border-[#D8E4F2] bg-[linear-gradient(135deg,#ffffff_0%,#f8fbff_52%,#eef9f4_100%)] shadow-[0_20px_60px_rgba(13,38,84,0.08)]">
+      <div className="border-b border-[#D8E4F2] px-5 py-5 md:px-6">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-4">
+            <div className="rounded-[24px] bg-[#0D2654] p-3 text-white shadow-[0_16px_34px_rgba(13,38,84,0.2)]">
+              <PresetIcon className="h-6 w-6" />
             </div>
-            <p className="mt-2 text-sm text-[#52627A]">
-              Solo aparecen funciones habilitadas para el perfil actual. Al abrirlas puedes trabajar con
-              acciones permitidas segun el nivel de acceso.
-            </p>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0F7A5C]">
+                Centro de trabajo
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl font-bold text-[#0D2654]">{selectedFeature.label}</h2>
+                <Badge variant={ACCESS_BADGE_VARIANTS[accessLevel]}>{ACCESS_LABELS[accessLevel]}</Badge>
+              </div>
+              <p className="mt-2 max-w-3xl text-sm text-[#52627A]">
+                {getAccessMessage(accessLevel, canCreate, canEdit, canDelete)}
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={ACCESS_BADGE_VARIANTS[accessLevel]}>{ACCESS_LABELS[accessLevel]}</Badge>
-            <Button variant="secondary" onClick={() => setOpen(true)}>
-              <Layers className="h-4 w-4" />
-              Abrir panel
+          <div className="flex flex-wrap gap-2 xl:max-w-[420px] xl:justify-end">
+            <Button onClick={handleCreate} disabled={!canCreate}>
+              <Plus className="h-4 w-4" />
+              Crear
+            </Button>
+            <Button variant="outline" onClick={handleEdit} disabled={!canEdit}>
+              <Edit3 className="h-4 w-4" />
+              Editar
+            </Button>
+            <Button variant="outline" onClick={handleDelete} disabled={!canDelete}>
+              <Trash2 className="h-4 w-4" />
+              Eliminar
+            </Button>
+            <Button variant="secondary" onClick={handleExport}>
+              <Download className="h-4 w-4" />
+              Exportar
             </Button>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {quickFeatures.map((feature) => (
-            <button
-              key={feature.id}
-              onClick={() => openFeature(feature.id)}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition ${
-                selectedFeature.id === feature.id
-                  ? 'border-[#0F7A5C]/30 bg-[#0F7A5C]/10 text-[#0D4A3E]'
-                  : 'border-black/8 bg-white text-[#0D2654] hover:bg-[#F4F7FB]'
-              }`}
-            >
-              <span>{feature.label}</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          ))}
+        <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar funcion o herramienta"
+                className="h-12 rounded-2xl border-[#D8E4F2] bg-white/85 pl-10 shadow-sm"
+              />
+            </div>
 
-          {overflowCount > 0 && (
-            <button
-              onClick={() => setOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-[#F4F7FB] px-3 py-2 text-sm font-medium text-[#0D2654] transition hover:bg-[#EAF0F8]"
-            >
-              +{overflowCount} mas
-            </button>
-          )}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {filteredFeatures.map((feature) => (
+                <button
+                  key={feature.id}
+                  onClick={() => setSelectedFeatureId(feature.id)}
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${
+                    selectedFeature.id === feature.id
+                      ? 'border-[#0F7A5C]/25 bg-[#0F7A5C] text-white shadow-[0_12px_28px_rgba(15,122,92,0.26)]'
+                      : 'border-[#D8E4F2] bg-white/85 text-[#0D2654] hover:bg-[#F3F8FE] hover:shadow-sm'
+                  }`}
+                >
+                  <span>{feature.label}</span>
+                  {selectedFeature.id === feature.id && <CheckCircle2 className="h-4 w-4" />}
+                </button>
+              ))}
+            </div>
+
+            {!filteredFeatures.length && (
+              <div className="mt-4 rounded-[24px] border border-dashed border-[#D8E4F2] bg-white/75 px-4 py-6 text-center text-sm text-[#6B7280]">
+                No encontramos una funcion con esa busqueda.
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-[28px] border border-[#D8E4F2] bg-white/82 p-4 shadow-sm backdrop-blur">
+            <div className="mb-3 flex items-center gap-2">
+              <Eye className="h-4 w-4 text-[#0F7A5C]" />
+              <h3 className="text-sm font-bold text-[#0D2654]">Vista rapida</h3>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+              {PRESET_STATS[selectedFeature.preset].map((statLabel, index) => (
+                <div key={statLabel} className="rounded-2xl bg-[#F8FBFF] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
+                    {statLabel}
+                  </p>
+                  <p className="mt-2 text-2xl font-bold text-[#0D2654]">
+                    {buildStatValue(selectedFeature, index)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-full overflow-hidden border-l-0 p-0 sm:max-w-6xl">
-          <div className="flex h-full flex-col bg-[#F4F7FB]">
-            <SheetHeader className="border-b border-black/8 bg-white px-6 py-5 text-left">
-              <div className="pr-8">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="grid gap-4 px-5 py-5 md:px-6 xl:grid-cols-[minmax(0,1.45fr)_340px]">
+        <div className="rounded-[30px] border border-white/70 bg-white/88 p-5 shadow-sm">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-[#0D2654]">Actividad activa</h3>
+              <p className="text-sm text-[#52627A]">
+                Registros y estado operativo de la funcion seleccionada.
+              </p>
+            </div>
+
+            <Button variant="ghost" onClick={() => setShowOnlyHighlighted((current) => !current)}>
+              <Filter className="h-4 w-4" />
+              {showOnlyHighlighted ? 'Ver todo' : 'Solo pendientes'}
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {visibleRows.map((row) => (
+              <div
+                key={row.id}
+                className={`rounded-[24px] border p-4 transition ${
+                  isHighlightedStatus(row.status)
+                    ? 'border-[#F4D06F] bg-[#FFF8E7]'
+                    : 'border-[#E3EBF5] bg-[#FBFCFE]'
+                }`}
+              >
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <SheetTitle className="text-2xl font-bold text-[#0D2654]">Panel de funciones</SheetTitle>
-                    <SheetDescription className="mt-1 text-[#52627A]">
-                      {MODULE_TITLES[moduleId] ?? moduleId} - {accessibleFeatures.length} funciones disponibles para {user.name}.
-                    </SheetDescription>
+                    <p className="font-semibold text-[#0D2654]">{row.title}</p>
+                    <p className="text-sm text-[#52627A]">{row.detail}</p>
                   </div>
-
-                  <div className="inline-flex items-center gap-2 rounded-2xl border border-[#0F7A5C]/20 bg-[#0F7A5C]/8 px-4 py-3 text-[#0D4A3E]">
-                    <PresetIcon className="h-5 w-5" />
-                    <span className="text-sm font-semibold">{selectedFeature.label}</span>
-                  </div>
+                  <Badge
+                    variant={isHighlightedStatus(row.status) ? 'warning' : 'secondary'}
+                    className="w-fit"
+                  >
+                    {row.status}
+                  </Badge>
                 </div>
               </div>
-            </SheetHeader>
+            ))}
 
-            <div className="grid min-h-0 flex-1 lg:grid-cols-[320px,1fr]">
-              <aside className="border-b border-black/8 bg-white p-4 lg:border-b-0 lg:border-r">
-                <div className="relative mb-4">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
-                  <Input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Buscar funcion"
-                    className="pl-10"
-                  />
-                </div>
+            {!visibleRows.length && (
+              <div className="rounded-[24px] border border-dashed border-[#D8E4F2] bg-[#FBFCFE] px-4 py-8 text-center text-sm text-[#6B7280]">
+                No hay registros para el filtro actual.
+              </div>
+            )}
+          </div>
+        </div>
 
-                <ScrollArea className="h-[260px] lg:h-[calc(100vh-220px)]">
-                  <div className="space-y-2 pr-3">
-                    {filteredFeatures.map((feature) => (
-                      <button
-                        key={feature.id}
-                        onClick={() => setSelectedFeatureId(feature.id)}
-                        className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                          selectedFeature.id === feature.id
-                            ? 'border-[#0F7A5C]/30 bg-[#0F7A5C]/10'
-                            : 'border-black/8 bg-[#FBFCFE] hover:bg-[#F4F7FB]'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <span className="text-sm font-semibold text-[#0D2654]">{feature.label}</span>
-                          <Badge variant={ACCESS_BADGE_VARIANTS[feature.access[roleId]]}>
-                            {ACCESS_LABELS[feature.access[roleId]]}
-                          </Badge>
-                        </div>
-                      </button>
-                    ))}
+        <div className="space-y-4">
+          <div className="rounded-[30px] border border-white/70 bg-white/88 p-5 shadow-sm">
+            <div className="mb-4 flex items-center gap-2">
+              <Layers className="h-4 w-4 text-[#0F7A5C]" />
+              <h3 className="text-lg font-bold text-[#0D2654]">Alcance actual</h3>
+            </div>
 
-                    {!filteredFeatures.length && (
-                      <div className="rounded-2xl border border-dashed border-black/12 bg-[#FBFCFE] px-4 py-6 text-center text-sm text-[#6B7280]">
-                        No hay funciones que coincidan con la busqueda.
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
-              </aside>
-
-              <div className="min-h-0 p-5">
-                <div className="flex h-full flex-col gap-5">
-                  <div className="rounded-[28px] border border-black/8 bg-white p-5 shadow-sm">
-                    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                      <div className="max-w-3xl">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-xl font-bold text-[#0D2654]">{selectedFeature.label}</h3>
-                          <Badge variant={ACCESS_BADGE_VARIANTS[accessLevel]}>{ACCESS_LABELS[accessLevel]}</Badge>
-                        </div>
-                        <p className="mt-3 text-sm text-[#52627A]">
-                          {getAccessMessage(accessLevel, canCreate, canEdit, canDelete)}
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <Badge variant={canCreate ? 'success' : 'outline'}>Crear</Badge>
-                          <Badge variant={canEdit ? 'warning' : 'outline'}>Editar</Badge>
-                          <Badge variant={canDelete ? 'destructive' : 'outline'}>Eliminar</Badge>
-                          <Badge variant="secondary">Exportar</Badge>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <Button onClick={handleCreate} disabled={!canCreate}>
-                          <Plus className="h-4 w-4" />
-                          Crear
-                        </Button>
-                        <Button variant="outline" onClick={handleEdit} disabled={!canEdit}>
-                          <Edit3 className="h-4 w-4" />
-                          Editar
-                        </Button>
-                        <Button variant="outline" onClick={handleDelete} disabled={!canDelete}>
-                          <Trash2 className="h-4 w-4" />
-                          Eliminar
-                        </Button>
-                        <Button variant="secondary" onClick={handleExport}>
-                          <Download className="h-4 w-4" />
-                          Exportar
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-3 md:grid-cols-3">
-                      {PRESET_STATS[selectedFeature.preset].map((statLabel, index) => (
-                        <div key={statLabel} className="rounded-2xl border border-black/8 bg-[#FBFCFE] p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
-                            {statLabel}
-                          </p>
-                          <p className="mt-2 text-2xl font-bold text-[#0D2654]">
-                            {buildStatValue(selectedFeature, index)}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid min-h-0 gap-5 xl:grid-cols-[1.3fr,0.7fr]">
-                    <div className="rounded-[28px] border border-black/8 bg-white p-5 shadow-sm">
-                      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <h4 className="text-lg font-bold text-[#0D2654]">Espacio de trabajo</h4>
-                          <p className="text-sm text-[#52627A]">
-                            Registros operativos disponibles para esta funcion.
-                          </p>
-                        </div>
-
-                        <Button
-                          variant="ghost"
-                          onClick={() => setShowOnlyHighlighted((current) => !current)}
-                        >
-                          <Filter className="h-4 w-4" />
-                          {showOnlyHighlighted ? 'Ver todo' : 'Solo pendientes'}
-                        </Button>
-                      </div>
-
-                      <div className="space-y-3">
-                        {visibleRows.map((row) => (
-                          <div key={row.id} className="rounded-2xl border border-black/8 bg-[#FBFCFE] p-4">
-                            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                              <div>
-                                <p className="font-semibold text-[#0D2654]">{row.title}</p>
-                                <p className="text-sm text-[#52627A]">{row.detail}</p>
-                              </div>
-                              <Badge
-                                variant={isHighlightedStatus(row.status) ? 'warning' : 'secondary'}
-                                className="w-fit"
-                              >
-                                {row.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
-
-                        {!visibleRows.length && (
-                          <div className="rounded-2xl border border-dashed border-black/12 bg-[#FBFCFE] px-4 py-8 text-center text-sm text-[#6B7280]">
-                            No hay registros para el filtro actual.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-5">
-                      <div className="rounded-[28px] border border-black/8 bg-white p-5 shadow-sm">
-                        <div className="mb-4 flex items-center gap-2">
-                          <Eye className="h-4 w-4 text-[#0F7A5C]" />
-                          <h4 className="text-lg font-bold text-[#0D2654]">Alcance del perfil</h4>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between rounded-2xl bg-[#F8FBFF] px-4 py-3">
-                            <span className="text-sm text-[#52627A]">Rol activo</span>
-                            <span className="text-sm font-semibold text-[#0D2654]">
-                              {roleId.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between rounded-2xl bg-[#F8FBFF] px-4 py-3">
-                            <span className="text-sm text-[#52627A]">Modulo</span>
-                            <span className="text-sm font-semibold text-[#0D2654]">
-                              {selectedFeature.moduleCode}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between rounded-2xl bg-[#F8FBFF] px-4 py-3">
-                            <span className="text-sm text-[#52627A]">Preset funcional</span>
-                            <span className="text-sm font-semibold text-[#0D2654]">{selectedFeature.preset}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="rounded-[28px] border border-black/8 bg-white p-5 shadow-sm">
-                        <div className="mb-4 flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-[#0F7A5C]" />
-                          <h4 className="text-lg font-bold text-[#0D2654]">Acciones rapidas</h4>
-                        </div>
-
-                        <div className="space-y-3">
-                          <Button variant="outline" className="w-full justify-between" onClick={handleQuickTrack}>
-                            Registrar seguimiento
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" className="w-full justify-between" onClick={handleExport}>
-                            Generar salida
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between"
-                            onClick={() => toast({
-                              title: 'Panel actualizado',
-                              description: `Se refresco la vista de ${selectedFeature.label}.`,
-                            })}
-                          >
-                            Refrescar funcion
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div className="space-y-3">
+              <div className="rounded-2xl bg-[#F8FBFF] px-4 py-3">
+                <span className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Rol</span>
+                <p className="mt-1 text-sm font-semibold text-[#0D2654]">{roleId.replace('_', ' ')}</p>
+              </div>
+              <div className="rounded-2xl bg-[#F8FBFF] px-4 py-3">
+                <span className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Codigo</span>
+                <p className="mt-1 text-sm font-semibold text-[#0D2654]">{selectedFeature.moduleCode}</p>
+              </div>
+              <div className="rounded-2xl bg-[#F8FBFF] px-4 py-3">
+                <span className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Modo</span>
+                <p className="mt-1 text-sm font-semibold text-[#0D2654]">{selectedFeature.preset}</p>
               </div>
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
-    </>
+
+          <div className="rounded-[30px] border border-white/70 bg-white/88 p-5 shadow-sm">
+            <div className="mb-4 flex items-center gap-2">
+              <ArrowRight className="h-4 w-4 text-[#0F7A5C]" />
+              <h3 className="text-lg font-bold text-[#0D2654]">Acciones rapidas</h3>
+            </div>
+
+            <div className="space-y-3">
+              <Button variant="outline" className="w-full justify-between" onClick={handleQuickTrack}>
+                Registrar seguimiento
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" className="w-full justify-between" onClick={handleExport}>
+                Generar salida
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                onClick={() =>
+                  toast({
+                    title: 'Vista actualizada',
+                    description: `Se refresco la vista de ${selectedFeature.label}.`,
+                  })
+                }
+              >
+                Refrescar vista
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 
