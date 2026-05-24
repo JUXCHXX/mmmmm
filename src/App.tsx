@@ -71,7 +71,7 @@ const AppContent = () => (
         <Route path="/reservas" element={<ReservationsPage />} />
         <Route path="/pqrs" element={<PQRSPage />} />
         <Route path="/mantenimiento" element={<MaintenancePage />} />
-        <Route path="/seguridad" element={<SecurityControlPage />} />
+        <Route path="/seguridad" element={<SecurityPage />} />
         <Route path="/seguridad-control" element={<SecurityControlPage />} />
         <Route path="/config-seguridad" element={<AdminSecurityPage />} />
         <Route path="/auditoria-seguridad" element={<AdminSecurityPage />} />
