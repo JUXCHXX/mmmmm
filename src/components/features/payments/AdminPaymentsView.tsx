@@ -18,10 +18,10 @@ interface Payment {
 }
 
 const STATUS_CONFIG: Record<Payment['status'], { bg: string; text: string; icon: React.ReactNode; label: string }> = {
-  paid: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: <CheckCircle2 className="w-4 h-4" />, label: 'Pagado' },
-  pending: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertTriangle className="w-4 h-4" />, label: 'Pendiente' },
-  overdue: { bg: 'bg-red-500/20', text: 'text-red-400', icon: <XCircle className="w-4 h-4" />, label: 'Vencido' },
-  partial: { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: <CreditCard className="w-4 h-4" />, label: 'Parcial' },
+  paid: { bg: 'bg-green-100', text: 'text-green-800', icon: <CheckCircle2 className="w-4 h-4" />, label: 'Pagado' },
+  pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: <AlertTriangle className="w-4 h-4" />, label: 'Pendiente' },
+  overdue: { bg: 'bg-red-100', text: 'text-red-800', icon: <XCircle className="w-4 h-4" />, label: 'Vencido' },
+  partial: { bg: 'bg-blue-100', text: 'text-blue-800', icon: <CreditCard className="w-4 h-4" />, label: 'Parcial' },
 };
 
 export function AdminPaymentsView() {
@@ -95,10 +95,10 @@ export function AdminPaymentsView() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-blue-600/40 to-blue-600/20 border border-white/10 rounded-lg p-4"
+          className="bg-white border border-blue-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
         >
-          <p className="text-gray-400 text-sm">Cartera Total</p>
-          <p className="text-2xl font-bold text-white mt-2">
+          <p className="text-sm text-muted-foreground">Cartera Total</p>
+          <p className="text-2xl font-bold text-foreground mt-2">
             ${(stats.totalPortfolio / 1000000).toFixed(1)}M
           </p>
         </motion.div>
@@ -107,31 +107,31 @@ export function AdminPaymentsView() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-emerald-600/40 to-emerald-600/20 border border-white/10 rounded-lg p-4"
+          className="bg-white border border-green-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
         >
-          <p className="text-gray-400 text-sm">Tasa Recaudo</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-2">{stats.collectionRate}%</p>
+          <p className="text-sm text-muted-foreground">Tasa Recaudo</p>
+          <p className="text-2xl font-bold text-green-700 mt-2">{stats.collectionRate}%</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-red-600/40 to-red-600/20 border border-white/10 rounded-lg p-4"
+          className="bg-white border border-red-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
         >
-          <p className="text-gray-400 text-sm">Morosos</p>
-          <p className="text-2xl font-bold text-red-400 mt-2">{stats.uniqueDefaulters}</p>
-          <p className="text-xs text-red-400/70 mt-1">${(stats.overdueAmount / 1000000).toFixed(1)}M vencido</p>
+          <p className="text-sm text-muted-foreground">Morosos</p>
+          <p className="text-2xl font-bold text-red-700 mt-2">{stats.uniqueDefaulters}</p>
+          <p className="text-xs text-red-600 mt-1">${(stats.overdueAmount / 1000000).toFixed(1)}M vencido</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-gradient-to-br from-amber-600/40 to-amber-600/20 border border-white/10 rounded-lg p-4"
+          className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
         >
-          <p className="text-gray-400 text-sm">Pendientes</p>
-          <p className="text-2xl font-bold text-amber-400 mt-2">
+          <p className="text-sm text-muted-foreground">Pendientes</p>
+          <p className="text-2xl font-bold text-amber-700 mt-2">
             ${(stats.pendingTotal / 1000000).toFixed(1)}M
           </p>
         </motion.div>
@@ -142,17 +142,17 @@ export function AdminPaymentsView() {
         <Button
           onClick={handleExportPortfolio}
           variant="outline"
-          className="flex items-center gap-2 border-white/20"
+          className="flex items-center gap-2"
         >
           <Download className="w-4 h-4" />
           Exportar Cartera
         </Button>
-        <div className="flex-1 flex items-center gap-2 bg-white/5 border border-white/10 rounded px-3">
-          <Filter className="w-4 h-4 text-gray-400" />
+        <div className="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 shadow-sm">
+          <Filter className="w-4 h-4 text-muted-foreground" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="flex-1 bg-transparent text-white text-sm py-2 outline-none"
+            className="flex-1 bg-white text-foreground text-sm py-2 outline-none"
           >
             <option value="all">Todos los estados</option>
             <option value="paid">Pagados</option>
@@ -165,7 +165,7 @@ export function AdminPaymentsView() {
 
       {/* Payments List */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-foreground">
           Registros: {filteredPayments.length} resultados
         </h3>
         <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
@@ -183,23 +183,24 @@ export function AdminPaymentsView() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ delay: idx * 0.03 }}
-                  className="bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition"
+                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => setExpandedId(isExpanded ? null : payment.id)}
                 >
-                  <div className="flex items-start justify-between cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : payment.id)}>
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-white">
+                        <h4 className="font-semibold text-foreground">
                           Unidad {unit?.tower}-{unit?.number} • {payment.concept}
                         </h4>
                         <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${statusCfg.bg} ${statusCfg.text}`}>
                           {statusCfg.icon} {statusCfg.label}
                         </span>
                       </div>
-                      <p className="text-gray-400 text-sm">Mes: {payment.month}</p>
+                      <p className="text-sm text-muted-foreground">Mes: {payment.month}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-white">${payment.amount.toLocaleString('es-CO')}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-lg font-bold text-foreground">${payment.amount.toLocaleString('es-CO')}</p>
+                      <p className="text-xs text-muted-foreground">
                         Vence: {new Date(payment.dueDate).toLocaleDateString('es-CO')}
                       </p>
                     </div>
@@ -212,17 +213,17 @@ export function AdminPaymentsView() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 pt-4 border-t border-white/10 space-y-3"
+                        className="mt-4 pt-4 border-t border-gray-200 space-y-3"
                       >
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
-                            <p className="text-gray-400">Monto Original</p>
-                            <p className="text-white font-semibold">${payment.amount.toLocaleString('es-CO')}</p>
+                            <p className="text-muted-foreground">Monto Original</p>
+                            <p className="text-foreground font-semibold">${payment.amount.toLocaleString('es-CO')}</p>
                           </div>
                           {payment.status === 'paid' && (
                             <div>
-                              <p className="text-gray-400">Pagado el</p>
-                              <p className="text-emerald-400 font-semibold">
+                              <p className="text-muted-foreground">Pagado el</p>
+                              <p className="text-green-700 font-semibold">
                                 {payment.paidDate ? new Date(payment.paidDate).toLocaleDateString('es-CO') : 'N/A'}
                               </p>
                             </div>
@@ -230,12 +231,12 @@ export function AdminPaymentsView() {
                           {payment.status === 'partial' && (
                             <>
                               <div>
-                                <p className="text-gray-400">Pagado</p>
-                                <p className="text-blue-400 font-semibold">${(payment.paidAmount || 0).toLocaleString('es-CO')}</p>
+                                <p className="text-muted-foreground">Pagado</p>
+                                <p className="text-blue-700 font-semibold">${(payment.paidAmount || 0).toLocaleString('es-CO')}</p>
                               </div>
                               <div>
-                                <p className="text-gray-400">Pendiente</p>
-                                <p className="text-amber-400 font-semibold">
+                                <p className="text-muted-foreground">Pendiente</p>
+                                <p className="text-amber-700 font-semibold">
                                   ${(payment.amount - (payment.paidAmount || 0)).toLocaleString('es-CO')}
                                 </p>
                               </div>
@@ -249,7 +250,7 @@ export function AdminPaymentsView() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="flex-1 text-blue-400 border-blue-500/50 hover:bg-blue-500/20"
+                              className="flex-1 text-blue-700 border-blue-200 hover:bg-blue-50"
                               onClick={() => handleCreatePaymentAgreement(payment.id)}
                             >
                               Crear Acuerdo
@@ -257,7 +258,7 @@ export function AdminPaymentsView() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="flex-1 text-amber-400 border-amber-500/50 hover:bg-amber-500/20"
+                              className="flex-1 text-amber-700 border-amber-200 hover:bg-amber-50"
                               onClick={() => handleSendNotification(payment.unitId)}
                             >
                               Notificar
@@ -269,7 +270,7 @@ export function AdminPaymentsView() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="w-full text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/20 flex items-center justify-center gap-2"
+                            className="w-full text-green-700 border-green-200 hover:bg-green-50 flex items-center justify-center gap-2"
                             onClick={() => handleGenerateReceipt(payment.id)}
                           >
                             <Eye className="w-4 h-4" />

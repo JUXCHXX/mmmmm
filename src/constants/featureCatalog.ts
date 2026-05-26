@@ -20,12 +20,13 @@ type FeatureModuleId =
   | 'settings'
   | 'support';
 
-type AccessShort = 'C' | 'R' | 'P' | 'N';
+type AccessShort = 'C' | 'R' | 'P' | 'O' | 'N';
 
 const ACCESS_MAP: Record<AccessShort, AccessLevel> = {
   C: 'FULL_ACCESS',
   R: 'READ_ONLY',
   P: 'LIMITED',
+  O: 'OWN_DATA_ONLY',
   N: 'NONE',
 };
 
@@ -125,20 +126,20 @@ export const FEATURE_CATALOG: Record<FeatureModuleId, FeatureDefinition[]> = {
   ],
   payments: [
     f('payments', 'm04_auto_payment_reconciliation', 'Conciliación automática de pagos', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
-    f('payments', 'm04_multichannel_collection', 'Recaudo multicanal', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
-    f('payments', 'm04_payment_agreements', 'Acuerdos de pago', acl('C', 'C', 'N', 'P', 'N', 'N', 'N')),
-    f('payments', 'm04_payment_promises', 'Promesas de pago', acl('C', 'C', 'N', 'P', 'N', 'N', 'N')),
+    f('payments', 'm04_multichannel_collection', 'Recaudo multicanal', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
+    f('payments', 'm04_payment_agreements', 'Acuerdos de pago', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
+    f('payments', 'm04_payment_promises', 'Promesas de pago', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
     f('payments', 'm04_blocking_by_mora', 'Bloqueo por mora según políticas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
-    f('payments', 'm04_collection_history', 'Historial de gestión de cobranza', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
-    f('payments', 'm04_aging_portfolio', 'Cartera por antigüedad', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
-    f('payments', 'm04_progressive_mora_notification', 'Notificación progresiva por mora', acl('C', 'C', 'N', 'R', 'N', 'N', 'N')),
-    f('payments', 'm04_refinancing_simulator', 'Simulador de refinanciación', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_collection_history', 'Historial de gestión de cobranza', acl('C', 'C', 'R', 'O', 'O', 'N', 'N')),
+    f('payments', 'm04_aging_portfolio', 'Cartera por antigüedad', acl('C', 'C', 'R', 'O', 'O', 'N', 'N')),
+    f('payments', 'm04_progressive_mora_notification', 'Notificación progresiva por mora', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
+    f('payments', 'm04_refinancing_simulator', 'Simulador de refinanciación', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
     f('payments', 'm04_campaign_collection', 'Recaudo extraordinario por campañas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
-    f('payments', 'm04_partial_payments', 'Pagos parciales', acl('C', 'C', 'N', 'P', 'N', 'N', 'N')),
-    f('payments', 'm04_credit_debit_notes', 'Notas crédito/débito', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_partial_payments', 'Pagos parciales', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
+    f('payments', 'm04_credit_debit_notes', 'Notas crédito/débito', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
     f('payments', 'm04_bank_integration', 'Integración bancaria', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
     f('payments', 'm04_daily_collection_board', 'Tablero de recaudo diario', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
-    f('payments', 'm04_predictive_mora_alerts', 'Alertas predictivas de morosidad por unidad', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
+    f('payments', 'm04_predictive_mora_alerts', 'Alertas predictivas de morosidad por unidad', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
   ],
   accounting: [
     f('accounting', 'm05_cost_centers', 'Centros de costo', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
@@ -157,17 +158,17 @@ export const FEATURE_CATALOG: Record<FeatureModuleId, FeatureDefinition[]> = {
   reservations: [
     f('reservations', 'm06_space_policies', 'Políticas por espacio', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
     f('reservations', 'm06_user_quota_limits', 'Cupos máximos por usuario', acl('C', 'C', 'N', 'R', 'R', 'N', 'N')),
-    f('reservations', 'm06_visual_calendar', 'Calendario visual por recurso', acl('C', 'C', 'R', 'R', 'R', 'P', 'N')),
+    f('reservations', 'm06_visual_calendar', 'Calendario visual por recurso', acl('C', 'C', 'R', 'O', 'O', 'P', 'N')),
     f('reservations', 'm06_mora_restrictions', 'Restricciones por mora', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
-    f('reservations', 'm06_payments_and_deposits', 'Pagos y depósitos asociados', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('reservations', 'm06_payments_and_deposits', 'Pagos y depósitos asociados', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
     f('reservations', 'm06_non_use_penalties', 'Penalizaciones por no uso', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
-    f('reservations', 'm06_waiting_list', 'Lista de espera', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('reservations', 'm06_waiting_list', 'Lista de espera', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
     f('reservations', 'm06_rules_based_approval', 'Aprobación por reglas', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
     f('reservations', 'm06_special_hours', 'Configuración de horarios especiales', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
     f('reservations', 'm06_maintenance_blocks', 'Bloqueo por mantenimiento', acl('C', 'C', 'N', 'N', 'N', 'N', 'N')),
-    f('reservations', 'm06_check_in_out', 'Check-in/check-out', acl('C', 'C', 'N', 'P', 'P', 'P', 'N')),
+    f('reservations', 'm06_check_in_out', 'Check-in/check-out', acl('C', 'C', 'N', 'O', 'O', 'P', 'N')),
     f('reservations', 'm06_space_condition_evidence', 'Evidencia del estado del espacio', acl('C', 'C', 'N', 'N', 'N', 'P', 'N')),
-    f('reservations', 'm06_reservation_history', 'Historial de reservas por unidad', acl('C', 'C', 'N', 'P', 'P', 'N', 'N')),
+    f('reservations', 'm06_reservation_history', 'Historial de reservas por unidad', acl('C', 'C', 'N', 'O', 'O', 'N', 'N')),
     f('reservations', 'm06_space_usage_analytics', 'Analítica de uso de espacios', acl('C', 'C', 'R', 'N', 'N', 'N', 'N')),
   ],
   pqrs: [

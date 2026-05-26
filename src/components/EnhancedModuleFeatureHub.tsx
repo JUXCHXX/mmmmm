@@ -34,7 +34,7 @@ import {
   Unlock,
   Eye,
 } from 'lucide-react';
-import { FeatureModal } from '@/components/FeatureModal';
+import { FeatureWorkspaceFallback } from '@/components/FeatureWorkspaceFallback';
 
 interface FeatureRecord {
   id: string;
@@ -518,14 +518,14 @@ export const EnhancedModuleFeatureHub = ({ moduleId }: { moduleId: ModuleId }) =
         />
       ) : null}
 
-      {modalState.isOpen && !ActiveActionComponent && (
-        <FeatureModal
-          isOpen={modalState.isOpen}
-          onClose={closeModal}
-          featureId={modalState.featureId || ''}
-          featureTitle={modalState.title}
+      {modalState.isOpen && !ActiveActionComponent && modalState.featureId && (
+        <FeatureWorkspaceFallback
+          featureId={modalState.featureId}
+          title={modalState.title}
           accessLevel={modalState.accessLevel}
           moduleCode={modalState.moduleCode}
+          roleId={roleId}
+          onClose={closeModal}
         />
       )}
     </>

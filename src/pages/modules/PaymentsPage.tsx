@@ -20,31 +20,28 @@ export default function PaymentsPage() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-blue-600/40 to-blue-600/20 border border-white/10 rounded-lg">
-            <CreditCard className="w-6 h-6 text-blue-400" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-white">Pagos y Cartera</h1>
-            <p className="text-gray-400 text-sm mt-1">
-              {isAdmin
-                ? 'Dashboard de recaudos, cartera y gestión de pagos'
-                : 'Tu estado de cuenta e historial de pagos'
-              }
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+            <CreditCard className="icon-responsive-lg text-primary" /> Pagos y Cartera
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {isAdmin
+              ? 'Dashboard de recaudos, cartera y gestión de pagos'
+              : 'Tu estado de cuenta e historial de pagos'
+            }
+          </p>
         </div>
       </div>
 
       {/* Content */}
-      <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+      <div className="bg-white border border-black/8 rounded-xl p-6 shadow-sm">
         {isAdmin ? (
           <AdminPaymentsView />
         ) : isTenant ? (
           <TenantPaymentsView />
         ) : (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-muted-foreground">
             <p>No tienes acceso a este módulo. Contacta con administración.</p>
           </div>
         )}

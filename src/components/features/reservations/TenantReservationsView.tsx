@@ -85,20 +85,20 @@ export function TenantReservationsView() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Mis Reservas', value: myReservations.length, icon: '📅' },
-          { label: 'Confirmadas', value: confirmedCount, icon: '✓' },
-          { label: 'Pendientes', value: pendingCount, icon: '⏳' },
+          { label: 'Mis Reservas', value: myReservations.length, icon: '📅', color: 'border-blue-200' },
+          { label: 'Confirmadas', value: confirmedCount, icon: '✓', color: 'border-green-200' },
+          { label: 'Pendientes', value: pendingCount, icon: '⏳', color: 'border-yellow-200' },
         ].map((stat, idx) => (
           <motion.div
             key={idx}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="bg-gradient-to-br from-teal-600/40 to-teal-600/20 border border-white/10 rounded-lg p-4"
+            className={`bg-white border ${stat.color} rounded-xl p-4 shadow-sm hover:shadow-md transition-all`}
           >
-            <p className="text-gray-400 text-sm">{stat.label}</p>
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
             <div className="flex items-center justify-between mt-2">
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
               <span className="text-2xl">{stat.icon}</span>
             </div>
           </motion.div>
@@ -120,11 +120,11 @@ export function TenantReservationsView() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-4"
+            className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 shadow-sm"
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">Hacer una Reserva</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-white">
+              <h3 className="text-lg font-semibold text-foreground">Hacer una Reserva</h3>
+              <button onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -132,7 +132,7 @@ export function TenantReservationsView() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Area Selection */}
               <div>
-                <label className="text-sm text-gray-400 block mb-2">Selecciona un área*</label>
+                <label className="text-sm text-muted-foreground block mb-2 font-medium">Selecciona un área*</label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {commonAreas.map(area => (
                     <motion.button
@@ -143,8 +143,8 @@ export function TenantReservationsView() {
                       whileTap={{ scale: 0.95 }}
                       className={`p-3 rounded-lg border-2 transition font-medium text-sm ${
                         selectedArea === area.id
-                          ? 'border-teal-500 bg-teal-500/20 text-teal-400'
-                          : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40'
+                          ? 'border-teal-500 bg-teal-50 text-teal-800'
+                          : 'border-gray-200 bg-white text-foreground hover:border-gray-300'
                       }`}
                     >
                       <div className="text-xl mb-1">{area.image}</div>
@@ -156,27 +156,27 @@ export function TenantReservationsView() {
 
               {/* Date */}
               <div>
-                <label className="text-sm text-gray-400 block mb-2">Fecha*</label>
+                <label className="text-sm text-muted-foreground block mb-2 font-medium">Fecha*</label>
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-foreground shadow-sm"
                   required
                 />
               </div>
 
               {/* Time Selection */}
               <div>
-                <label className="text-sm text-gray-400 block mb-2">Horario*</label>
+                <label className="text-sm text-muted-foreground block mb-2 font-medium">Horario*</label>
                 <select
                   value={`${formData.startTime}-${formData.endTime}`}
                   onChange={(e) => {
                     const [start, end] = e.target.value.split('-');
                     setFormData(prev => ({ ...prev, startTime: start, endTime: end }));
                   }}
-                  className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-foreground text-sm shadow-sm"
                 >
                   {timeSlots.map(slot => {
                     const [start, end] = slot.split('-');
@@ -189,26 +189,26 @@ export function TenantReservationsView() {
 
               {/* Guests */}
               <div>
-                <label className="text-sm text-gray-400 block mb-2">Número de personas*</label>
+                <label className="text-sm text-muted-foreground block mb-2 font-medium">Número de personas*</label>
                 <input
                   type="number"
                   min="1"
                   max="10"
                   value={formData.guests}
                   onChange={(e) => setFormData(prev => ({ ...prev, guests: parseInt(e.target.value) }))}
-                  className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-foreground shadow-sm"
                   required
                 />
               </div>
 
               {/* Reason */}
               <div>
-                <label className="text-sm text-gray-400 block mb-2">Motivo (opcional)</label>
+                <label className="text-sm text-muted-foreground block mb-2 font-medium">Motivo (opcional)</label>
                 <textarea
                   value={formData.reason}
                   onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
                   placeholder="Ej: Reunión familiar, celebración..."
-                  className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm resize-none"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-foreground text-sm resize-none shadow-sm"
                   rows={3}
                 />
               </div>
@@ -238,11 +238,11 @@ export function TenantReservationsView() {
 
       {/* My Reservations */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-white">Mis Reservas ({myReservations.length})</h3>
+        <h3 className="text-lg font-semibold text-foreground">Mis Reservas ({myReservations.length})</h3>
         <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
           {myReservations.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+            <div className="text-center py-8 text-muted-foreground">
+              <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>No tienes reservas aún</p>
             </div>
           ) : (
@@ -251,36 +251,36 @@ export function TenantReservationsView() {
                 key={res.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className={`bg-white/5 border rounded-lg p-4 transition ${
-                  res.status === 'confirmed' ? 'border-emerald-500/50' : 'border-white/10'
+                className={`bg-white border rounded-lg p-4 transition shadow-sm hover:shadow-md ${
+                  res.status === 'confirmed' ? 'border-green-200' : 'border-gray-200'
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h4 className="font-semibold text-white">{res.areaName}</h4>
-                    <p className="text-gray-400 text-sm mt-1">
+                    <h4 className="font-semibold text-foreground">{res.areaName}</h4>
+                    <p className="text-muted-foreground text-sm mt-1">
                       {new Date(res.date).toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${
                     res.status === 'confirmed'
-                      ? 'bg-emerald-500/20 text-emerald-400'
+                      ? 'bg-green-100 text-green-800'
                       : res.status === 'pending'
-                        ? 'bg-amber-500/20 text-amber-400'
-                        : 'bg-red-500/20 text-red-400'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
                   }`}>
                     {res.status === 'confirmed' && <CheckCircle2 className="w-3 h-3" />}
                     {res.status === 'confirmed' ? 'Confirmada' : res.status === 'pending' ? 'Pendiente' : 'Cancelada'}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-3 text-sm text-gray-300 mb-3">
+                <div className="flex flex-wrap gap-3 text-sm text-foreground mb-3">
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-gray-500" />
+                    <Clock className="w-3 h-3 text-muted-foreground" />
                     {res.startTime} - {res.endTime}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Users className="w-3 h-3 text-gray-500" />
+                    <Users className="w-3 h-3 text-muted-foreground" />
                     {res.guests} personas
                   </div>
                 </div>
@@ -290,7 +290,7 @@ export function TenantReservationsView() {
                     onClick={() => handleCancel(res.id)}
                     variant="outline"
                     size="sm"
-                    className="w-full text-red-400 hover:text-red-300 border-red-500/50"
+                    className="w-full text-red-700 hover:text-red-800 border-red-200 hover:bg-red-50"
                   >
                     Cancelar Reserva
                   </Button>

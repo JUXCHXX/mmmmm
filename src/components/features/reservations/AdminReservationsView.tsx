@@ -23,9 +23,9 @@ interface ExtendedReservation {
 }
 
 const STATUS_CONFIG: Record<ReservationStatus, { bg: string; text: string; icon: React.ReactNode; label: string }> = {
-  confirmed: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: <CheckCircle2 className="w-4 h-4" />, label: 'Confirmada' },
-  pending: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertCircle className="w-4 h-4" />, label: 'Pendiente' },
-  cancelled: { bg: 'bg-red-500/20', text: 'text-red-400', icon: <XCircle className="w-4 h-4" />, label: 'Cancelada' },
+  confirmed: { bg: 'bg-green-100', text: 'text-green-800', icon: <CheckCircle2 className="w-4 h-4" />, label: 'Confirmada' },
+  pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: <AlertCircle className="w-4 h-4" />, label: 'Pendiente' },
+  cancelled: { bg: 'bg-red-100', text: 'text-red-800', icon: <XCircle className="w-4 h-4" />, label: 'Cancelada' },
 };
 
 export function AdminReservationsView() {
@@ -81,20 +81,20 @@ export function AdminReservationsView() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total', value: stats.total, color: 'from-blue-600/40 to-blue-600/20' },
-          { label: 'Confirmadas', value: stats.confirmed, color: 'from-emerald-600/40 to-emerald-600/20' },
-          { label: 'Pendientes', value: stats.pending, color: 'from-amber-600/40 to-amber-600/20' },
-          { label: 'Canceladas', value: stats.cancelled, color: 'from-red-600/40 to-red-600/20' },
+          { label: 'Total', value: stats.total, color: 'border-blue-200' },
+          { label: 'Confirmadas', value: stats.confirmed, color: 'border-green-200' },
+          { label: 'Pendientes', value: stats.pending, color: 'border-yellow-200' },
+          { label: 'Canceladas', value: stats.cancelled, color: 'border-red-200' },
         ].map((stat, idx) => (
           <motion.div
             key={idx}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className={`bg-gradient-to-br ${stat.color} border border-white/10 rounded-lg p-4`}
+            className={`bg-white border ${stat.color} rounded-xl p-4 shadow-sm hover:shadow-md transition-all`}
           >
-            <p className="text-gray-400 text-sm">{stat.label}</p>
-            <p className="text-2xl font-bold text-white mt-2">{stat.value}</p>
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className="text-2xl font-bold text-foreground mt-2">{stat.value}</p>
           </motion.div>
         ))}
       </div>
@@ -102,11 +102,11 @@ export function AdminReservationsView() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
-          <label className="text-sm text-gray-400 block mb-2">Filtrar por área</label>
+          <label className="text-sm text-muted-foreground block mb-2 font-medium">Filtrar por área</label>
           <select
             value={selectedArea}
             onChange={(e) => setSelectedArea(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm"
+            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-foreground text-sm shadow-sm"
           >
             <option value="all">Todas las áreas</option>
             {commonAreas.map(area => (
@@ -115,11 +115,11 @@ export function AdminReservationsView() {
           </select>
         </div>
         <div className="flex-1">
-          <label className="text-sm text-gray-400 block mb-2">Filtrar por estado</label>
+          <label className="text-sm text-muted-foreground block mb-2 font-medium">Filtrar por estado</label>
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value as any)}
-            className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm"
+            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-foreground text-sm shadow-sm"
           >
             <option value="all">Todos los estados</option>
             <option value="confirmed">Confirmadas</option>
@@ -131,7 +131,7 @@ export function AdminReservationsView() {
 
       {/* Reservations List */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-white">Reservas: {filteredReservations.length} resultados</h3>
+        <h3 className="text-lg font-semibold text-foreground">Reservas: {filteredReservations.length} resultados</h3>
         <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
           <AnimatePresence mode="popLayout">
             {filteredReservations.map((res, idx) => {
@@ -146,31 +146,31 @@ export function AdminReservationsView() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition"
+                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-white">{res.residentName}</h4>
+                        <h4 className="font-semibold text-foreground">{res.residentName}</h4>
                         <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${statusCfg.bg} ${statusCfg.text}`}>
                           {statusCfg.icon} {statusCfg.label}
                         </span>
                       </div>
-                      <p className="text-gray-400 text-sm">Unidad {res.unitNumber}</p>
+                      <p className="text-muted-foreground text-sm">Unidad {res.unitNumber}</p>
                     </div>
                     <div className="flex gap-2">
                       {isPending && (
                         <>
                           <button
                             onClick={() => handleApprove(res.id)}
-                            className="p-2 rounded hover:bg-emerald-500/20 text-emerald-400 transition"
+                            className="p-2 rounded hover:bg-green-100 text-green-700 transition"
                             title="Aprobar"
                           >
                             <CheckCircle2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleReject(res.id)}
-                            className="p-2 rounded hover:bg-red-500/20 text-red-400 transition"
+                            className="p-2 rounded hover:bg-red-100 text-red-700 transition"
                             title="Rechazar"
                           >
                             <XCircle className="w-4 h-4" />
@@ -179,7 +179,7 @@ export function AdminReservationsView() {
                       )}
                       <button
                         onClick={() => handleDelete(res.id)}
-                        className="p-2 rounded hover:bg-red-500/20 text-red-400 transition"
+                        className="p-2 rounded hover:bg-red-100 text-red-700 transition"
                         title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -188,19 +188,19 @@ export function AdminReservationsView() {
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <span className="text-teal-400 font-medium">{res.areaName}</span>
+                    <div className="flex items-center gap-2 text-foreground">
+                      <span className="font-medium">{res.areaName}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <Calendar className="w-3 h-3 text-gray-500" />
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Calendar className="w-3 h-3 text-muted-foreground" />
                       <span>{new Date(res.date).toLocaleDateString('es-CO')}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <Clock className="w-3 h-3 text-gray-500" />
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
                       <span>{res.startTime} - {res.endTime}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <Users className="w-3 h-3 text-gray-500" />
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Users className="w-3 h-3 text-muted-foreground" />
                       <span>{res.guests} personas</span>
                     </div>
                   </div>
@@ -213,8 +213,8 @@ export function AdminReservationsView() {
 
       {filteredReservations.length === 0 && (
         <div className="text-center py-8">
-          <AlertCircle className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-          <p className="text-gray-400">No hay reservas para mostrar</p>
+          <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3 opacity-30" />
+          <p className="text-muted-foreground">No hay reservas para mostrar</p>
         </div>
       )}
     </div>

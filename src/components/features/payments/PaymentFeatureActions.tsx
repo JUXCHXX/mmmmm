@@ -9,6 +9,7 @@ import {
   FeatureSectionCard,
   getFeatureCapabilities,
 } from '@/components/features/shared/FeatureActionShell';
+import { PaymentsFeatureWorkspace } from '@/components/features/payments/PaymentsFeatureWorkspace';
 import { toast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useAppStore } from '@/store/useAppStore';
@@ -134,8 +135,8 @@ const getPaymentWorkspace = (
   const user = useAuthStore.getState().user;
 
   const visiblePayments =
-    roleId === 'propietario'
-      ? payments.filter((payment) => payment.owner === user?.name)
+    roleId === 'propietario' || roleId === 'arrendatario'
+      ? payments.filter((payment) => payment.owner === user?.name || payment.unit === user?.unitId)
       : payments;
 
   const overduePayments = visiblePayments.filter((payment) => payment.status === 'overdue');
@@ -837,6 +838,12 @@ export const PaymentFeatureAction = (props: FeatureActionProps) => {
       footer={workspace.footerActions ? <FeatureActionButtons actions={workspace.footerActions} /> : undefined}
     >
       <FeatureMetricGrid metrics={workspace.metrics} />
+
+      <PaymentsFeatureWorkspace
+        featureId={props.featureId as PaymentFeatureId}
+        accessLevel={props.accessLevel}
+        roleId={props.roleId}
+      />
 
       {workspace.composer && (
         <FeatureFormCard

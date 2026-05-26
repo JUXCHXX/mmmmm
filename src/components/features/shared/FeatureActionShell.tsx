@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { AccessLevel } from '@/types/roles';
 import type { LucideIcon } from 'lucide-react';
 import { AlertTriangle, Eye, PencilLine, ShieldCheck, UserRound } from 'lucide-react';
@@ -79,7 +79,7 @@ export interface FeatureItem {
 
 export interface FeatureActionButton {
   label: string;
-  onClick?: () => void;
+  onClick?: (values?: Record<string, string>) => void;
   variant?: 'default' | 'outline';
   tone?: Tone;
   disabled?: boolean;
@@ -172,8 +172,8 @@ export const FeatureActionShell = ({
   const AccessIcon = ACCESS_ICON[accessLevel];
 
   return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-4xl">
+      <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-6xl">
         <DialogHeader className="space-y-4">
           <div className="flex items-start gap-4">
             <div className="rounded-2xl bg-[#0D2B4E] p-3 text-white shadow-sm">
@@ -184,9 +184,6 @@ export const FeatureActionShell = ({
               <DialogDescription className="text-left text-sm text-slate-600">
                 {summary}
               </DialogDescription>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                {moduleCode}
-              </p>
             </div>
           </div>
 
@@ -312,49 +309,102 @@ export const FeatureFormCard = ({
   fields: FeatureFormField[];
   disabledMessage?: string;
   action?: FeatureActionButton;
-}) => (
-  <FeatureSectionCard title={title} description={description}>
-    <div className="grid gap-3 md:grid-cols-2">
-      {fields.map((field) => (
-        <label key={`${field.label}-${field.placeholder}`} className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">{field.label}</span>
-          {field.type === 'textarea' ? (
-            <textarea
-              rows={4}
-              defaultValue={field.defaultValue}
-              disabled={field.disabled}
-              placeholder={field.placeholder}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#1E7EC8]"
-            />
-          ) : (
-            <input
-              type={field.type ?? 'text'}
-              defaultValue={field.defaultValue}
-              disabled={field.disabled}
-              placeholder={field.placeholder}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#1E7EC8]"
+}) => {
+  const [values, setValues] = useState<Record<string, string>>(
+    () =>
+      fields.reduce<Record<string, string>>((acc, field) => {
+        acc[field.label] = field.defaultValue ?? '';
+        return acc;
+      }, {}),
+  );
+  const [lastSaved, setLastSaved] = useState<Record<string, string> | null>(null);
+
+  const handleSave = () => {
+    if (!action) {
+      return;
+    }
+
+    action.onClick?.(values);
+    setLastSaved(values);
+  };
+
+  return (
+    <FeatureSectionCard title={title} description={description}>
+      <div className="grid gap-3 md:grid-cols-2">
+        {fields.map((field) => (
+          <label key={`${field.label}-${field.placeholder}`} className="space-y-2">
+            <span className="text-sm font-medium text-slate-700">{field.label}</span>
+            {field.type === 'textarea' ? (
+              <textarea
+                rows={4}
+                value={values[field.label] ?? ''}
+                disabled={field.disabled}
+                placeholder={field.placeholder}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    [field.label]: event.target.value,
+                  }))
+                }
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#1E7EC8]"
+              />
+            ) : (
+              <input
+                type={field.type ?? 'text'}
+                value={values[field.label] ?? ''}
+                disabled={field.disabled}
+                placeholder={field.placeholder}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    [field.label]: event.target.value,
+                  }))
+                }
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#1E7EC8]"
+              />
+            )}
+          </label>
+        ))}
+      </div>
+
+      {lastSaved && (
+        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <p className="text-sm font-semibold text-emerald-700">Cambios listos en esta vista</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {Object.entries(lastSaved)
+              .filter(([, value]) => value.trim().length > 0)
+              .slice(0, 4)
+              .map(([label, value]) => (
+                <span
+                  key={label}
+                  className="rounded-full bg-white px-3 py-1 text-xs font-medium text-emerald-700"
+                >
+                  {label}: {value}
+                </span>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {(action || disabledMessage) && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          {disabledMessage ? <p className="text-xs text-slate-500">{disabledMessage}</p> : <span />}
+          {action && (
+            <FeatureActionButtons
+              actions={[
+                {
+                  ...action,
+                  onClick: handleSave,
+                  variant: action.variant ?? 'default',
+                },
+              ]}
             />
           )}
-        </label>
-      ))}
-    </div>
-    {(action || disabledMessage) && (
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        {disabledMessage ? <p className="text-xs text-slate-500">{disabledMessage}</p> : <span />}
-        {action && (
-          <FeatureActionButtons
-            actions={[
-              {
-                ...action,
-                variant: action.variant ?? 'default',
-              },
-            ]}
-          />
-        )}
-      </div>
-    )}
-  </FeatureSectionCard>
-);
+        </div>
+      )}
+    </FeatureSectionCard>
+  );
+};
 
 export const FeatureActionButtons = ({ actions }: { actions: FeatureActionButton[] }) => (
   <div className="flex flex-wrap items-center gap-3">

@@ -9,6 +9,7 @@ import {
   FeatureSectionCard,
   getFeatureCapabilities,
 } from '@/components/features/shared/FeatureActionShell';
+import { ReservationsFeatureWorkspace } from '@/components/features/reservations/ReservationsFeatureWorkspace';
 import { toast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useAppStore } from '@/store/useAppStore';
@@ -129,7 +130,9 @@ const getReservationWorkspace = (
   const user = useAuthStore.getState().user;
 
   const isResidentProfile = roleId === 'propietario' || roleId === 'arrendatario';
-  const ownedReservations = reservations.filter((reservation) => reservation.resident === user?.name);
+  const ownedReservations = reservations.filter(
+    (reservation) => reservation.resident === user?.name || reservation.unit === user?.unitId,
+  );
   const visibleReservations = capabilities.isOwnDataOnly || isResidentProfile ? ownedReservations : reservations;
 
   const pendingReservations = reservations.filter((reservation) => reservation.status === 'pending');
@@ -875,6 +878,12 @@ export const ReservationFeatureAction = (props: FeatureActionProps) => {
       ))}
 
       <FeatureMetricGrid metrics={workspace.metrics} />
+
+      <ReservationsFeatureWorkspace
+        featureId={props.featureId as ReservationFeatureId}
+        accessLevel={props.accessLevel}
+        roleId={props.roleId}
+      />
 
       {workspace.composer && (
         <FeatureFormCard
