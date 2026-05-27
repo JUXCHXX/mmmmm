@@ -1100,7 +1100,7 @@ const PerfilTab = ({ user }: { user: any }) => {
           <div className="relative flex-shrink-0">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="w-32 h-32 rounded-2xl bg-gradient-to-br from-[#1E7EC8] via-[#1A5FA0] to-[#0D2B4E] flex items-center justify-center text-white text-5xl font-bold shadow-lg border-4 border-white"
+              className="w-32 h-32 rounded-2xl bg-gradient-to-br from-[#1E7EC8] via-[#1A5FA0] to-[#0D2B4E] flex items-center justify-center text-white text-3xl font-bold shadow-lg border-4 border-white"
             >
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </motion.div>

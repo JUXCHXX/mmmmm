@@ -159,7 +159,7 @@ const DocumentsPage = () => {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl md:text-4xl font-black text-foreground flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3 mb-2">
               <FolderOpen className="h-10 w-10 text-primary" />
               Gestión Documental
             </h1>

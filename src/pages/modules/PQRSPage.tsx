@@ -42,6 +42,9 @@ const PQRSPage = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPQRS, setSelectedPQRS] = useState<any>(null);
+  const [newComment, setNewComment] = useState('');
+  const [comments, setComments] = useState<{ id: string; author: string; text: string; date: string; avatar: string }[]>([]);
 
   const filteredPQRS = pqrs.filter(p => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
@@ -88,11 +91,11 @@ const PQRSPage = () => {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
         <div className="flex items-center gap-4 mb-2">
-          <div className="text-5xl text-primary">
+          <div className="text-3xl text-primary">
             <ClipboardList className="w-14 h-14" strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-4xl md:text-5xl font-black text-foreground">PQRS</h1>
+            <h1 className="text-3xl font-bold text-foreground">PQRS</h1>
             <p className="text-muted-foreground text-sm mt-1">Peticiones, Quejas, Reclamos y Sugerencias</p>
           </div>
         </div>
@@ -503,6 +506,13 @@ const PQRSPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                     whileHover={{ y: -3, boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
+                    onClick={() => {
+                      setSelectedPQRS(p);
+                      setComments([
+                        { id: '1', author: 'Admin', text: 'Se ha recibido la solicitud. En proceso de evaluación.', date: '2025-05-24 10:30', avatar: '👨‍💼' },
+                        { id: '2', author: p.resident, text: 'Requiero que sea atendido lo antes posible', date: '2025-05-24 11:00', avatar: '👤' },
+                      ]);
+                    }}
                     className={`bg-white rounded-[12px] border border-[#E5E7EB] p-6 shadow-sm rounded-xl border-l-4 group cursor-pointer transition-all ${
                       p.priority === 'urgent' ? 'border-l-red-500 hover:shadow-red-500/10' :
                       p.priority === 'high' ? 'border-l-orange-500 hover:shadow-orange-500/10' :
@@ -559,6 +569,89 @@ const PQRSPage = () => {
         </>
       )}
       </AnimatePresence>
+
+      {/* PQRS Detail Modal */}
+      {selectedPQRS && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto p-4">
+          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-96 overflow-y-auto my-8">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground mb-1">{selectedPQRS.subject}</h2>
+                <p className="text-xs text-muted-foreground">{selectedPQRS.ticket}</p>
+              </div>
+              <button onClick={() => setSelectedPQRS(null)} className="text-muted-foreground hover:text-foreground"><XCircle className="w-6 h-6" /></button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Estado</p>
+                <p className="text-sm font-bold text-foreground">{STATUS_LABELS[selectedPQRS.status].label}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Prioridad</p>
+                <p className="text-sm font-bold">{PRIORITY_MAP[selectedPQRS.priority].label}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Residente</p>
+                <p className="text-sm font-bold text-foreground">{selectedPQRS.resident}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Fecha</p>
+                <p className="text-sm font-bold text-foreground">{selectedPQRS.date}</p>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-bold text-sm mb-3">Historial de Estados</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex gap-3"><div className="w-3 h-3 rounded-full bg-green-500 mt-1 flex-shrink-0"></div><div><p className="font-semibold">Recibido</p><p className="text-xs text-muted-foreground">2025-05-24 09:00 AM</p></div></div>
+                <div className="flex gap-3"><div className="w-3 h-3 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div><div><p className="font-semibold">En Proceso</p><p className="text-xs text-muted-foreground">2025-05-24 10:15 AM</p></div></div>
+              </div>
+            </div>
+
+            {/* Comments */}
+            <div className="mb-4">
+              <h4 className="font-bold text-sm mb-3">Comentarios</h4>
+              <div className="space-y-3 max-h-40 overflow-y-auto mb-3">
+                {comments.map(comment => (
+                  <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex items-start gap-2 mb-1">
+                      <span className="text-lg">{comment.avatar}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-foreground">{comment.author}</p>
+                        <p className="text-xs text-muted-foreground">{comment.date}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 ml-8">{comment.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 mb-3">
+                <input type="text" placeholder="Agregar comentario..." value={newComment} onChange={(e) => setNewComment(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <button
+                  onClick={() => {
+                    if (newComment.trim()) {
+                      setComments([...comments, { id: String(Date.now()), author: 'Tú', text: newComment, date: new Date().toLocaleString('es-CO'), avatar: '👤' }]);
+                      setNewComment('');
+                    }
+                  }}
+                  className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700"
+                >
+                  Comentar
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={() => setSelectedPQRS(null)} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Cerrar</button>
+              {canAdvance && selectedPQRS.status !== 'closed' && (
+                <button onClick={() => { advanceStatus(selectedPQRS.id, selectedPQRS.status); setSelectedPQRS(null); }} className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700">Avanzar Estado</button>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };

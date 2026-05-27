@@ -246,6 +246,17 @@ const SecurityPage = () => {
   const [emergencyMode, setEmergencyMode] = useState(false);
   const [lockedAccess, setLockedAccess] = useState(false);
 
+  // Modal states
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [showVisitorModal, setShowVisitorModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [emergencyTime, setEmergencyTime] = useState<Date | null>(null);
+  const [visitorForm, setVisitorForm] = useState({ name: '', document: '', visitDate: '', visitTime: '', numPersons: '1', reason: '' });
+  const [contactMessages, setContactMessages] = useState<{ id: string; sender: 'porteria' | 'user'; text: string; time: string }[]>([
+    { id: '1', sender: 'porteria', text: 'Portería disponible', time: new Date(Date.now() - 5 * 60000).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) },
+  ]);
+  const [contactInput, setContactInput] = useState('');
+
   // Detectar si es la ruta de configuración de seguridad
   const location = useLocation();
   const isSecurityConfigRoute = location.pathname === '/config-seguridad';
@@ -292,9 +303,30 @@ const SecurityPage = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setEmergencyMode(true)} className="px-4 py-2 rounded-xl bg-red-600 text-white font-bold flex items-center gap-2">
-                <Siren className="w-4 h-4" /> Emergency
-              </button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowEmergencyModal(true)}
+                className="relative px-4 py-2 rounded-xl bg-red-600 text-white font-bold flex items-center gap-2 hover:bg-red-700 transition-colors"
+              >
+                <motion.div animate={emergencyMode ? { opacity: [1, 0.5, 1] } : {}} transition={{ duration: 0.5, repeat: emergencyMode ? Infinity : 0 }} className="absolute inset-0 rounded-xl bg-red-600 -z-10" />
+                <Siren className="w-4 h-4" /> Alerta Emergencia
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowVisitorModal(true)}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors"
+              >
+                <QrCode className="w-4 h-4" /> Invitar Visitante
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowContactModal(true)}
+                className="px-4 py-2 rounded-xl bg-purple-600 text-white font-bold flex items-center gap-2 hover:bg-purple-700 transition-colors"
+              >
+                <PhoneCall className="w-4 h-4" /> Contactar Portería
+              </motion.button>
               <button onClick={() => setLockedAccess(!lockedAccess)} className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${lockedAccess ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'}`}>
                 {lockedAccess ? <Lock className="w-4 h-4" /> : <Key className="w-4 h-4" />}
                 {lockedAccess ? 'Bloqueado' : 'Desbloqueado'}
@@ -819,6 +851,97 @@ const SecurityPage = () => {
             <button onClick={() => toast({ title: 'Configuración guardada', description: 'Tu configuración de portería ha sido guardada correctamente' })} className="w-full py-3 rounded-xl bg-[#0D4A3E] text-white font-semibold flex items-center justify-center gap-2">
               <Save className="w-5 h-5" /> Guardar Configuración
             </button>
+          </motion.div>
+        )}
+
+        {/* Emergency Alert Modal */}
+        {showEmergencyModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+              <h2 className="text-2xl font-bold text-red-600 mb-4">Confirmación de Alerta</h2>
+              <p className="text-gray-600 mb-6">¿Confirmar activación de alerta de emergencia? Esta acción enviará notificaciones a portería y administración.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowEmergencyModal(false)} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Cancelar</button>
+                <button
+                  onClick={() => {
+                    setEmergencyTime(new Date());
+                    setEmergencyMode(true);
+                    setShowEmergencyModal(false);
+                    toast({ title: 'Alerta de emergencia activada', description: 'Notificaciones enviadas a portería y administración', duration: 3 });
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700"
+                >
+                  Confirmar Alerta
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Visitor Invitation Modal */}
+        {showVisitorModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 my-8">
+              <h2 className="text-2xl font-bold text-blue-600 mb-4">Invitar Visitante</h2>
+              <div className="space-y-4 mb-6">
+                <input type="text" placeholder="Nombre del visitante" value={visitorForm.name} onChange={(e) => setVisitorForm({ ...visitorForm, name: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="text" placeholder="Documento (CC, TI, etc)" value={visitorForm.document} onChange={(e) => setVisitorForm({ ...visitorForm, document: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="date" value={visitorForm.visitDate} onChange={(e) => setVisitorForm({ ...visitorForm, visitDate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="time" value={visitorForm.visitTime} onChange={(e) => setVisitorForm({ ...visitorForm, visitTime: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="number" min="1" placeholder="Número de personas" value={visitorForm.numPersons} onChange={(e) => setVisitorForm({ ...visitorForm, numPersons: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input type="text" placeholder="Motivo de la visita" value={visitorForm.reason} onChange={(e) => setVisitorForm({ ...visitorForm, reason: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              {visitorForm.name && visitorForm.document && (
+                <div className="bg-gray-100 rounded-lg p-4 mb-6 flex flex-col items-center">
+                  <p className="text-xs text-gray-500 mb-2">Código QR de invitación</p>
+                  <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl">QR</div>
+                  <button onClick={() => { navigator.clipboard.writeText(`${visitorForm.name} - ${visitorForm.document}`); toast({ title: 'Código copiado' }); }} className="text-xs text-blue-600 mt-2 hover:underline">Copiar enlace</button>
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button onClick={() => setShowVisitorModal(false)} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Cancelar</button>
+                <button
+                  onClick={() => {
+                    toast({ title: 'Visitante invitado', description: `${visitorForm.name} ha sido agregado a visitantes esperados` });
+                    setVisitorForm({ name: '', document: '', visitDate: '', visitTime: '', numPersons: '1', reason: '' });
+                    setShowVisitorModal(false);
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700"
+                >
+                  Crear Invitación
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Contact Porteria Modal */}
+        {showContactModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 flex flex-col max-h-96">
+              <h2 className="text-2xl font-bold text-purple-600 mb-4">Chat con Portería</h2>
+              <div className="flex items-center gap-2 mb-4 text-sm text-green-600"><CircleCheck className="w-4 h-4" /> Portería en línea</div>
+              <div className="flex-1 overflow-y-auto mb-4 space-y-3 bg-gray-50 rounded-lg p-3">
+                {contactMessages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`px-4 py-2 rounded-lg max-w-xs ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-900'}`}>
+                      <p className="text-sm">{msg.text}</p>
+                      <p className="text-xs opacity-70 mt-1">{msg.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 mb-4">
+                <input type="text" placeholder="Escribe tu mensaje..." value={contactInput} onChange={(e) => setContactInput(e.target.value)} onKeyPress={(e) => {
+                  if (e.key === 'Enter' && contactInput.trim()) {
+                    setContactMessages([...contactMessages, { id: String(Date.now()), sender: 'user', text: contactInput, time: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) }]);
+                    setContactInput('');
+                  }
+                }} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none" />
+                <button onClick={() => { if (contactInput.trim()) { setContactMessages([...contactMessages, { id: String(Date.now()), sender: 'user', text: contactInput, time: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) }]); setContactInput(''); } }} className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700">Enviar</button>
+              </div>
+              <button onClick={() => setShowContactModal(false)} className="w-full px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Cerrar Chat</button>
+            </motion.div>
           </motion.div>
         )}
       </div>
