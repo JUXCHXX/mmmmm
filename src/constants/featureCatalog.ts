@@ -346,6 +346,10 @@ FEATURE_CATALOG.payments.forEach((feature) => {
   feature.access.consejo = COUNCIL_PAYMENT_ACCESS_OVERRIDES[feature.id] ?? 'NONE';
 });
 
+FEATURE_CATALOG.reservations.forEach((feature) => {
+  feature.access.consejo = feature.id === 'm06_payments_and_deposits' ? 'READ_ONLY' : 'FULL_ACCESS';
+});
+
 export const ALL_FEATURES = Object.values(FEATURE_CATALOG).flat();
 
 export const FEATURE_BY_ID = Object.fromEntries(

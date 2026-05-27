@@ -1,4 +1,5 @@
 export { AdminReservationsView } from './AdminReservationsView';
+export { CouncilReservationsView } from './CouncilReservationsView';
 export { TenantReservationsView } from './TenantReservationsView';
 export { ReservationFeatureAction } from './ReservationFeatureActions';
 import { registerFeatureAction } from '@/actions/featureActions';
