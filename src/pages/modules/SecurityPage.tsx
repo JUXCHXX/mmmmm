@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocation } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import { getAccessLevel } from '@/types/modules';
 import { 
   ShieldCheck, QrCode, Clock, MapPin, Eye, Phone, Users, User, Car, Lock, Key, Bell, Activity, BarChart3, Layers, Plus, Ban, AlertOctagon, 
   Package, PackageOpen, Siren, PhoneCall, ExternalLink, ClipboardList, UserMinus, CarFront, Video, Monitor, AlertCircle, CheckCircle, AlertTriangle,
-  CircleCheck, Grid, List, TrendingUp, Settings, Save, Mail, BellRing, Smartphone, Shield, Check
+  CircleCheck, Grid, List, TrendingUp, Settings, Save, Mail, BellRing, Smartphone, Shield, Check, Search, Download
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
@@ -99,6 +101,45 @@ interface SecurityRound {
   endTime?: string;
   status: 'completed' | 'in_progress' | 'pending';
   observations: string;
+}
+
+interface CouncilAccessLog {
+  id: string;
+  date: string;
+  time: string;
+  name: string;
+  type: 'Visitante' | 'Residente' | 'Proveedor';
+  destination: string;
+  entry: boolean;
+  exit: string;
+  registeredBy: string;
+}
+
+interface CouncilPackageRecord {
+  id: string;
+  date: string;
+  recipient: string;
+  unit: string;
+  description: string;
+  status: string;
+}
+
+interface CouncilShiftNote {
+  id: string;
+  date: string;
+  time: string;
+  description: string;
+  shift: string;
+  active: boolean;
+}
+
+interface CouncilAlertRecord {
+  id: string;
+  type: string;
+  date: string;
+  time: string;
+  triggeredBy: string;
+  resolution: string;
 }
 
 const SAMPLE_VISITORS: Visitor[] = [
@@ -229,12 +270,140 @@ const SECURITY_METRICS = {
   guardsOnDuty: 4,
 };
 
+const CURRENT_SECURITY_DATE = new Date().toLocaleDateString('sv-SE');
+
+const COUNCIL_ACCESS_LOGS: CouncilAccessLog[] = [
+  {
+    id: 'council-log-1',
+    date: CURRENT_SECURITY_DATE,
+    time: '08:15',
+    name: 'Carlos Mendoza',
+    type: 'Visitante',
+    destination: 'Apto 301',
+    entry: true,
+    exit: '-',
+    registeredBy: 'Porteria',
+  },
+  {
+    id: 'council-log-2',
+    date: CURRENT_SECURITY_DATE,
+    time: '09:30',
+    name: 'ServiFix S.A.S',
+    type: 'Proveedor',
+    destination: 'Apto 101',
+    entry: true,
+    exit: '11:20',
+    registeredBy: 'Porteria',
+  },
+  {
+    id: 'council-log-3',
+    date: CURRENT_SECURITY_DATE,
+    time: '10:45',
+    name: 'Maria Suarez',
+    type: 'Visitante',
+    destination: 'Apto 205',
+    entry: true,
+    exit: '-',
+    registeredBy: 'Porteria',
+  },
+  {
+    id: 'council-log-4',
+    date: CURRENT_SECURITY_DATE,
+    time: '11:00',
+    name: 'Pedro Gomez',
+    type: 'Residente',
+    destination: 'Torre 2',
+    entry: true,
+    exit: '-',
+    registeredBy: 'Acceso QR',
+  },
+  {
+    id: 'council-log-5',
+    date: CURRENT_SECURITY_DATE,
+    time: '13:15',
+    name: 'DHL Express',
+    type: 'Proveedor',
+    destination: 'Porteria',
+    entry: true,
+    exit: '13:20',
+    registeredBy: 'Porteria',
+  },
+];
+
+const COUNCIL_PACKAGE_RECORDS: CouncilPackageRecord[] = [
+  { id: 'pkg-1', date: CURRENT_SECURITY_DATE, recipient: 'Laura Gutierrez', unit: 'Apto 301', description: 'Paquete pequeno - ecommerce', status: 'Pendiente de entrega' },
+  { id: 'pkg-2', date: CURRENT_SECURITY_DATE, recipient: 'Carlos Ruiz', unit: 'Apto 102', description: 'Sobre certificado', status: 'Entregado' },
+  { id: 'pkg-3', date: CURRENT_SECURITY_DATE, recipient: 'Torre 2 Administracion', unit: 'Oficina', description: 'Correspondencia bancaria', status: 'Recibido en porteria' },
+];
+
+const COUNCIL_SHIFT_NOTES: CouncilShiftNote[] = [
+  {
+    id: 'note-1',
+    date: CURRENT_SECURITY_DATE,
+    time: '07:10',
+    description: 'Se reporta cierre preventivo de acceso vehicular norte por revision de talanquera.',
+    shift: 'Turno manana',
+    active: true,
+  },
+  {
+    id: 'note-2',
+    date: CURRENT_SECURITY_DATE,
+    time: '10:20',
+    description: 'Proveedor de ascensores ingreso con autorizacion y salida registrada sin novedad.',
+    shift: 'Turno manana',
+    active: false,
+  },
+  {
+    id: 'note-3',
+    date: CURRENT_SECURITY_DATE,
+    time: '12:05',
+    description: 'Camara CAM-006 en verificacion tecnica; monitoreo temporal cubierto por CAM-005.',
+    shift: 'Turno manana',
+    active: true,
+  },
+];
+
+const COUNCIL_ALERT_HISTORY: CouncilAlertRecord[] = [
+  {
+    id: 'alert-1',
+    type: 'Movimiento en zona BBQ',
+    date: CURRENT_SECURITY_DATE,
+    time: '14:15',
+    triggeredBy: 'Sistema CCTV',
+    resolution: 'Verificado por porteria, sin riesgo activo.',
+  },
+  {
+    id: 'alert-2',
+    type: 'Camara fuera de linea',
+    date: '2026-05-18',
+    time: '21:40',
+    triggeredBy: 'Monitoreo automatico',
+    resolution: 'Equipo reiniciado y estable desde las 22:05.',
+  },
+  {
+    id: 'alert-3',
+    type: 'Intento de acceso no autorizado',
+    date: '2026-05-11',
+    time: '19:12',
+    triggeredBy: 'Porteria',
+    resolution: 'Ingreso rechazado y residente informado.',
+  },
+];
+
+const COUNCIL_VEHICLE_SUMMARY = [
+  { date: CURRENT_SECURITY_DATE, count: 7 },
+  { date: '2026-05-25', count: 5 },
+];
+
 type PorteriaTab = 'dashboard' | 'access' | 'security' | 'rounds' | 'analytics' | 'config';
 type UserSecurityTab = 'home' | 'config';
 
 const SecurityPage = () => {
   const user = useAuthStore((s) => s.user);
+  const roleId = user?.roleId ?? 'propietario';
+  const securityAccess = getAccessLevel('security', roleId);
   const isPorteria = user?.roleId === 'porteria';
+  const isConsejoReadOnly = user?.roleId === 'consejo' && securityAccess === 'READ_ONLY';
   const isArrendatario = user?.roleId === 'arrendatario';
   const isPropietario = user?.roleId === 'propietario';
 
@@ -252,6 +421,8 @@ const SecurityPage = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [emergencyTime, setEmergencyTime] = useState<Date | null>(null);
   const [visitorForm, setVisitorForm] = useState({ name: '', document: '', visitDate: '', visitTime: '', numPersons: '1', reason: '' });
+  const [councilLogDate, setCouncilLogDate] = useState(CURRENT_SECURITY_DATE);
+  const [councilSearch, setCouncilSearch] = useState('');
   const [contactMessages, setContactMessages] = useState<{ id: string; sender: 'porteria' | 'user'; text: string; time: string }[]>([
     { id: '1', sender: 'porteria', text: 'Portería disponible', time: new Date(Date.now() - 5 * 60000).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) },
   ]);
@@ -272,6 +443,73 @@ const SecurityPage = () => {
     accessHistory: true,
     biometricAccess: false,
   });
+
+  const councilLogsByDate = COUNCIL_ACCESS_LOGS.filter((log) => log.date === councilLogDate);
+  const filteredCouncilLogs = councilLogsByDate.filter((log) => {
+    const matchesDate = log.date === councilLogDate;
+    const matchesSearch =
+      !councilSearch ||
+      log.name.toLowerCase().includes(councilSearch.toLowerCase()) ||
+      log.destination.toLowerCase().includes(councilSearch.toLowerCase());
+    return matchesDate && matchesSearch;
+  });
+  const filteredCouncilPackages = COUNCIL_PACKAGE_RECORDS.filter((record) => record.date === councilLogDate);
+  const filteredCouncilNotes = COUNCIL_SHIFT_NOTES.filter((note) => note.date === councilLogDate);
+  const filteredCouncilAlerts = COUNCIL_ALERT_HISTORY.filter((alert) => alert.date <= councilLogDate);
+  const councilVehicleEntries =
+    COUNCIL_VEHICLE_SUMMARY.find((summary) => summary.date === councilLogDate)?.count ?? 0;
+  const councilVisitorsToday = councilLogsByDate.filter((log) => log.type === 'Visitante').length;
+  const councilActiveNotes = filteredCouncilNotes.filter((note) => note.active).length;
+
+  const exportCouncilLogPDF = () => {
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    let y = 18;
+
+    pdf.setFontSize(16);
+    pdf.text('BUNTY - Bitacora de seguridad', 14, y);
+    y += 7;
+    pdf.setFontSize(10);
+    pdf.text(`Fecha: ${councilLogDate}`, 14, y);
+    y += 8;
+
+    const columns = [
+      { label: 'Hora', x: 14 },
+      { label: 'Nombre', x: 28 },
+      { label: 'Tipo', x: 90 },
+      { label: 'Destino', x: 120 },
+      { label: 'Ingreso', x: 160 },
+      { label: 'Salida', x: 178 },
+      { label: 'Registrado por', x: 205 },
+    ];
+
+    pdf.setFontSize(9);
+    columns.forEach((column) => pdf.text(column.label, column.x, y));
+    y += 4;
+    pdf.line(14, y, 282, y);
+    y += 6;
+
+    filteredCouncilLogs.forEach((log) => {
+      if (y > 190) {
+        pdf.addPage();
+        y = 18;
+      }
+
+      pdf.text(log.time, 14, y);
+      pdf.text(log.name.slice(0, 30), 28, y);
+      pdf.text(log.type, 90, y);
+      pdf.text(log.destination.slice(0, 20), 120, y);
+      pdf.text(log.entry ? 'Si' : 'No', 160, y);
+      pdf.text(log.exit, 178, y);
+      pdf.text(log.registeredBy.slice(0, 20), 205, y);
+      y += 7;
+    });
+
+    pdf.save(`bitacora-seguridad-${councilLogDate}.pdf`);
+    toast({
+      title: 'PDF exportado',
+      description: `La bitacora del ${councilLogDate} fue descargada.`,
+    });
+  };
 
   if (isPorteria) {
     return (
@@ -944,6 +1182,332 @@ const SecurityPage = () => {
             </motion.div>
           </motion.div>
         )}
+      </div>
+    );
+  }
+
+  if (isConsejoReadOnly) {
+    return (
+      <div className="space-y-6">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
+              <ShieldCheck className="w-8 h-8 text-primary" /> Seguridad y Acceso
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Vista ejecutiva del consejo para seguimiento integral de seguridad.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600">
+              <Eye className="w-3.5 h-3.5" />
+              Modo lectura · Solo visualizacion
+            </span>
+            <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600">
+              Solo lectura
+            </span>
+          </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <Users className="w-5 h-5 text-blue-400" />
+              <span className="text-xs font-medium text-blue-600">Hoy</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{councilVisitorsToday}</p>
+            <p className="text-xs uppercase tracking-wide text-gray-500 mt-1">Visitantes registrados</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <Car className="w-5 h-5 text-emerald-400" />
+              <span className="text-xs font-medium text-emerald-600">Resumen del dia</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{councilVehicleEntries}</p>
+            <p className="text-xs uppercase tracking-wide text-gray-500 mt-1">Vehiculos que entraron</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <AlertCircle className="w-5 h-5 text-amber-400" />
+              <span className="text-xs font-medium text-amber-600">Seguimiento</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{councilActiveNotes}</p>
+            <p className="text-xs uppercase tracking-wide text-gray-500 mt-1">Novedades activas</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-1 flex-col gap-3 md:flex-row">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Fecha</label>
+                <input
+                  type="date"
+                  value={councilLogDate}
+                  onChange={(event) => setCouncilLogDate(event.target.value)}
+                  className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="flex-[1.4]">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={councilSearch}
+                    onChange={(event) => setCouncilSearch(event.target.value)}
+                    placeholder="Nombre o apartamento"
+                    className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={exportCouncilLogPDF}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <Download className="w-4 h-4" />
+              Exportar PDF
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  Bitacora de ingresos y salidas
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Registro diario consultable por fecha para control y auditoria.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+                Solo lectura
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
+                    <th className="pb-3 pr-4 font-medium">Hora</th>
+                    <th className="pb-3 pr-4 font-medium">Nombre</th>
+                    <th className="pb-3 pr-4 font-medium">Tipo</th>
+                    <th className="pb-3 pr-4 font-medium">Destino</th>
+                    <th className="pb-3 pr-4 font-medium">Ingreso</th>
+                    <th className="pb-3 pr-4 font-medium">Salida</th>
+                    <th className="pb-3 font-medium">Registrado por</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCouncilLogs.map((log) => (
+                    <tr key={log.id} className="border-b border-gray-100 last:border-b-0">
+                      <td className="py-3 pr-4 text-gray-500">{log.time}</td>
+                      <td className="py-3 pr-4 font-medium text-gray-900">{log.name}</td>
+                      <td className="py-3 pr-4 text-gray-600">{log.type}</td>
+                      <td className="py-3 pr-4 text-gray-600">{log.destination}</td>
+                      <td className="py-3 pr-4">
+                        {log.entry ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Si
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">No</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4 text-gray-600">{log.exit}</td>
+                      <td className="py-3 text-gray-600">{log.registeredBy}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredCouncilLogs.length === 0 && (
+                <div className="py-8 text-center text-sm text-gray-500">
+                  No hay registros para la fecha seleccionada.
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  Registro de correspondencia y paquetes
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Trazabilidad del correo y los paquetes recibidos en porteria.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+                Solo lectura
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
+                    <th className="pb-3 pr-4 font-medium">Fecha</th>
+                    <th className="pb-3 pr-4 font-medium">Destinatario</th>
+                    <th className="pb-3 pr-4 font-medium">Apto</th>
+                    <th className="pb-3 pr-4 font-medium">Descripcion</th>
+                    <th className="pb-3 font-medium">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCouncilPackages.map((record) => (
+                    <tr key={record.id} className="border-b border-gray-100 last:border-b-0">
+                      <td className="py-3 pr-4 text-gray-500">{record.date}</td>
+                      <td className="py-3 pr-4 font-medium text-gray-900">{record.recipient}</td>
+                      <td className="py-3 pr-4 text-gray-600">{record.unit}</td>
+                      <td className="py-3 pr-4 text-gray-600">{record.description}</td>
+                      <td className="py-3">
+                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                          {record.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredCouncilPackages.length === 0 && (
+                <div className="py-8 text-center text-sm text-gray-500">
+                  No hay paquetes registrados para la fecha seleccionada.
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  Novedades del turno
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Registro textual de observaciones generadas por porteria.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+                Solo lectura
+              </span>
+            </div>
+            <div className="space-y-3">
+              {filteredCouncilNotes.map((note) => (
+                <div key={note.id} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400 mb-2">
+                    <span>{note.date}</span>
+                    <span>·</span>
+                    <span>{note.time}</span>
+                    <span>·</span>
+                    <span>{note.shift}</span>
+                    {note.active && (
+                      <>
+                        <span>·</span>
+                        <span className="font-medium text-amber-600">Activa</span>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-700">{note.description}</p>
+                </div>
+              ))}
+              {filteredCouncilNotes.length === 0 && (
+                <div className="py-8 text-center text-sm text-gray-500">
+                  No hay novedades registradas para la fecha seleccionada.
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  Historial de alertas
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Consolidado de alertas activadas en los ultimos 30 dias.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+                Solo lectura
+              </span>
+            </div>
+            <div className="space-y-3">
+              {filteredCouncilAlerts.map((alert) => (
+                <div key={alert.id} className="rounded-xl border border-gray-200 p-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-600">
+                          {alert.type}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {alert.date} · {alert.time}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">Activada por {alert.triggeredBy}</p>
+                    </div>
+                    <p className="max-w-xl text-sm text-gray-500 md:text-right">{alert.resolution}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  Acceso a camaras
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Vista de monitoreo en solo lectura para supervision del consejo.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+                Solo lectura
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {SECURITY_CAMERAS.map((camera) => (
+                <div key={camera.id} className={`bg-white rounded-xl border border-gray-200 p-4 shadow-sm ${camera.status === 'online' ? '' : 'opacity-80'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Video className={`w-5 h-5 ${camera.status === 'online' ? 'text-emerald-500' : 'text-red-400'}`} />
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${camera.status === 'online' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                        {camera.status === 'online' ? 'EN VIVO' : 'OFFLINE'}
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
+                      Solo visualizacion
+                    </span>
+                  </div>
+                  <div className="bg-black/60 rounded-lg h-32 mb-3 flex items-center justify-center">
+                    <div className="text-center">
+                      <Monitor className="w-8 h-8 text-gray-400 mx-auto mb-1" />
+                      <p className="text-xs text-gray-300">{camera.name}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-900">{camera.name}</p>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{camera.zone}</span>
+                      <span>{camera.resolution}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
     );
   }

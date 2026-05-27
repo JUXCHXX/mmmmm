@@ -1,34 +1,145 @@
+import { useState, type ElementType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, type PQRS } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { ClipboardList, ArrowRight, BarChart3, PieChart, TrendingUp, AlertTriangle, CheckCircle, Clock, Users, Filter, Search, Calendar, XCircle, MessageSquare, AlertCircle, Lightbulb, Mail, Settings, Zap, CheckSquare } from 'lucide-react';
+import {
+  ClipboardList,
+  ArrowRight,
+  BarChart3,
+  PieChart,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Filter,
+  Search,
+  XCircle,
+  MessageSquare,
+  AlertCircle,
+  Lightbulb,
+  Mail,
+  Settings,
+  Zap,
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useState } from 'react';
 
 const STATUS_FLOW = ['received', 'in_progress', 'escalated', 'resolved', 'closed'] as const;
-const STATUS_LABELS: Record<string, { label: string; class: string; icon: any }> = {
-  received: { label: 'Recibido', class: 'bg-blue-500/20 text-blue-400', icon: Mail },
-  in_progress: { label: 'En Proceso', class: 'bg-amber-500/20 text-amber-400', icon: Settings },
-  escalated: { label: 'Escalado', class: 'bg-violet-500/20 text-violet-400', icon: TrendingUp },
-  resolved: { label: 'Resuelto', class: 'bg-emerald-500/20 text-emerald-400', icon: CheckCircle },
-  closed: { label: 'Cerrado', class: 'bg-gray-500/20 text-gray-400', icon: XCircle },
+
+const STATUS_LABELS: Record<
+  PQRS['status'],
+  { label: string; className: string; toneClass: string; icon: ElementType }
+> = {
+  received: {
+    label: 'Recibido',
+    className: 'bg-blue-50 text-blue-600 border border-blue-100',
+    toneClass: 'bg-blue-50',
+    icon: Mail,
+  },
+  in_progress: {
+    label: 'En proceso',
+    className: 'bg-amber-50 text-amber-600 border border-amber-100',
+    toneClass: 'bg-amber-50',
+    icon: Settings,
+  },
+  escalated: {
+    label: 'Escalado',
+    className: 'bg-violet-50 text-violet-600 border border-violet-100',
+    toneClass: 'bg-violet-50',
+    icon: TrendingUp,
+  },
+  resolved: {
+    label: 'Resuelto',
+    className: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+    toneClass: 'bg-emerald-50',
+    icon: CheckCircle,
+  },
+  closed: {
+    label: 'Cerrado',
+    className: 'bg-slate-100 text-slate-600 border border-slate-200',
+    toneClass: 'bg-slate-100',
+    icon: XCircle,
+  },
 };
 
-const PRIORITY_MAP: Record<string, { label: string; class: string; icon: any }> = {
-  low: { label: 'Baja', class: 'text-blue-400', icon: AlertCircle },
-  medium: { label: 'Media', class: 'text-amber-400', icon: AlertTriangle },
-  high: { label: 'Alta', class: 'text-orange-400', icon: AlertTriangle },
-  urgent: { label: 'Urgente', class: 'text-red-400', icon: Zap },
+const PRIORITY_MAP: Record<
+  PQRS['priority'],
+  {
+    label: string;
+    className: string;
+    textClass: string;
+    borderClass: string;
+    softClass: string;
+    icon: ElementType;
+  }
+> = {
+  low: {
+    label: 'Baja',
+    className: 'bg-blue-50 text-blue-600 border border-blue-100',
+    textClass: 'text-blue-500',
+    borderClass: 'border-l-blue-500',
+    softClass: 'bg-blue-50',
+    icon: AlertCircle,
+  },
+  medium: {
+    label: 'Media',
+    className: 'bg-amber-50 text-amber-600 border border-amber-100',
+    textClass: 'text-amber-500',
+    borderClass: 'border-l-amber-400',
+    softClass: 'bg-amber-50',
+    icon: AlertTriangle,
+  },
+  high: {
+    label: 'Alta',
+    className: 'bg-red-50 text-red-600 border border-red-100',
+    textClass: 'text-red-500',
+    borderClass: 'border-l-red-500',
+    softClass: 'bg-red-50',
+    icon: AlertTriangle,
+  },
+  urgent: {
+    label: 'Urgente',
+    className: 'bg-red-50 text-red-700 border border-red-100',
+    textClass: 'text-red-600',
+    borderClass: 'border-l-red-600',
+    softClass: 'bg-red-50',
+    icon: Zap,
+  },
 };
 
-const CATEGORY_MAP: Record<string, { label: string; icon: any; color: string; gradient: string }> = {
-  petition: { label: 'Petición', icon: MessageSquare, color: 'blue', gradient: 'from-blue-600/40 to-blue-600/20' },
-  complaint: { label: 'Queja', icon: AlertTriangle, color: 'red', gradient: 'from-red-600/40 to-red-600/20' },
-  claim: { label: 'Reclamo', icon: AlertCircle, color: 'orange', gradient: 'from-orange-600/40 to-orange-600/20' },
-  suggestion: { label: 'Sugerencia', icon: Lightbulb, color: 'emerald', gradient: 'from-emerald-600/40 to-emerald-600/20' },
+const CATEGORY_MAP: Record<PQRS['category'], { label: string; className: string; icon: ElementType }> = {
+  petition: {
+    label: 'Peticion',
+    className: 'bg-sky-50 text-sky-600 border border-sky-100',
+    icon: MessageSquare,
+  },
+  complaint: {
+    label: 'Queja',
+    className: 'bg-rose-50 text-rose-600 border border-rose-100',
+    icon: AlertTriangle,
+  },
+  claim: {
+    label: 'Reclamo',
+    className: 'bg-orange-50 text-orange-600 border border-orange-100',
+    icon: AlertCircle,
+  },
+  suggestion: {
+    label: 'Sugerencia',
+    className: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+    icon: Lightbulb,
+  },
 };
 
 type TabType = 'lista' | 'analisis' | 'estadisticas';
+
+interface PQRSComment {
+  id: string;
+  author: string;
+  text: string;
+  date: string;
+  avatar: string;
+}
+
+const basePanelClass = 'bg-white rounded-xl border border-gray-200 shadow-sm';
 
 const PQRSPage = () => {
   const { pqrs, updatePQRSStatus } = useAppStore();
@@ -42,614 +153,679 @@ const PQRSPage = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPQRS, setSelectedPQRS] = useState<any>(null);
+  const [selectedPQRS, setSelectedPQRS] = useState<PQRS | null>(null);
   const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState<{ id: string; author: string; text: string; date: string; avatar: string }[]>([]);
+  const [comments, setComments] = useState<PQRSComment[]>([]);
 
-  const filteredPQRS = pqrs.filter(p => {
-    if (statusFilter !== 'all' && p.status !== statusFilter) return false;
-    if (priorityFilter !== 'all' && p.priority !== priorityFilter) return false;
-    if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
-    if (searchTerm && !p.subject.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !p.resident.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+  const filteredPQRS = pqrs.filter((item) => {
+    if (statusFilter !== 'all' && item.status !== statusFilter) return false;
+    if (priorityFilter !== 'all' && item.priority !== priorityFilter) return false;
+    if (categoryFilter !== 'all' && item.category !== categoryFilter) return false;
+    if (
+      searchTerm &&
+      !item.subject.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !item.resident.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !item.unit.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
+      return false;
+    }
     return true;
   });
 
+  const visiblePQRS = hasFullAccess ? filteredPQRS : pqrs;
+
   const stats = {
     total: pqrs.length,
-    received: pqrs.filter(p => p.status === 'received').length,
-    inProgress: pqrs.filter(p => p.status === 'in_progress').length,
-    escalated: pqrs.filter(p => p.status === 'escalated').length,
-    resolved: pqrs.filter(p => p.status === 'resolved').length,
-    closed: pqrs.filter(p => p.status === 'closed').length,
+    received: pqrs.filter((item) => item.status === 'received').length,
+    inProgress: pqrs.filter((item) => item.status === 'in_progress').length,
+    escalated: pqrs.filter((item) => item.status === 'escalated').length,
+    resolved: pqrs.filter((item) => item.status === 'resolved').length,
+    closed: pqrs.filter((item) => item.status === 'closed').length,
     byPriority: {
-      urgent: pqrs.filter(p => p.priority === 'urgent').length,
-      high: pqrs.filter(p => p.priority === 'high').length,
-      medium: pqrs.filter(p => p.priority === 'medium').length,
-      low: pqrs.filter(p => p.priority === 'low').length,
+      urgent: pqrs.filter((item) => item.priority === 'urgent').length,
+      high: pqrs.filter((item) => item.priority === 'high').length,
+      medium: pqrs.filter((item) => item.priority === 'medium').length,
+      low: pqrs.filter((item) => item.priority === 'low').length,
     },
     byCategory: {
-      petition: pqrs.filter(p => p.category === 'petition').length,
-      complaint: pqrs.filter(p => p.category === 'complaint').length,
-      claim: pqrs.filter(p => p.category === 'claim').length,
-      suggestion: pqrs.filter(p => p.category === 'suggestion').length,
+      petition: pqrs.filter((item) => item.category === 'petition').length,
+      complaint: pqrs.filter((item) => item.category === 'complaint').length,
+      claim: pqrs.filter((item) => item.category === 'claim').length,
+      suggestion: pqrs.filter((item) => item.category === 'suggestion').length,
     },
-    resolutionRate: pqrs.length > 0 ? Math.round((pqrs.filter(p => p.status === 'resolved' || p.status === 'closed').length / pqrs.length) * 100) : 0,
-    averageTime: '3.2 días',
+    resolutionRate:
+      pqrs.length > 0
+        ? Math.round(
+            ((pqrs.filter((item) => item.status === 'resolved' || item.status === 'closed').length || 0) /
+              pqrs.length) *
+              100,
+          )
+        : 0,
+    averageTime: '3.2 dias',
   };
 
-  const advanceStatus = (id: string, current: string) => {
-    const idx = STATUS_FLOW.indexOf(current as any);
-    if (idx < STATUS_FLOW.length - 1) {
-      updatePQRSStatus(id, STATUS_FLOW[idx + 1]);
-      toast({ title: 'Estado actualizado', description: `Avanzado a: ${STATUS_LABELS[STATUS_FLOW[idx + 1]].label}` });
+  const summaryCards = [
+    { label: 'Total', value: stats.total, icon: BarChart3, iconClass: 'text-slate-400' },
+    { label: 'Resueltos', value: stats.resolved + stats.closed, icon: CheckCircle, iconClass: 'text-emerald-400' },
+    {
+      label: 'Pendientes',
+      value: stats.received + stats.inProgress + stats.escalated,
+      icon: Clock,
+      iconClass: 'text-amber-400',
+    },
+    { label: 'Resolucion', value: `${stats.resolutionRate}%`, icon: TrendingUp, iconClass: 'text-violet-400' },
+  ];
+
+  const advanceStatus = (id: string, current: PQRS['status']) => {
+    const currentIndex = STATUS_FLOW.indexOf(current);
+    if (currentIndex >= 0 && currentIndex < STATUS_FLOW.length - 1) {
+      const nextStatus = STATUS_FLOW[currentIndex + 1];
+      updatePQRSStatus(id, nextStatus);
+      toast({
+        title: 'Estado actualizado',
+        description: `Avanzado a: ${STATUS_LABELS[nextStatus].label}`,
+      });
     }
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-        <div className="flex items-center gap-4 mb-2">
-          <div className="text-3xl text-primary">
-            <ClipboardList className="w-14 h-14" strokeWidth={1.5} />
-          </div>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+        <div className="flex items-start gap-3">
+          <ClipboardList className="w-8 h-8 text-primary mt-0.5" />
           <div>
-            <h1 className="text-3xl font-bold text-foreground">PQRS</h1>
-            <p className="text-muted-foreground text-sm mt-1">Peticiones, Quejas, Reclamos y Sugerencias</p>
+            <h1 className="text-3xl font-bold text-gray-900">PQRS</h1>
+            <p className="text-sm text-gray-500 font-normal mt-1">
+              Peticiones, Quejas, Reclamos y Sugerencias
+            </p>
           </div>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <motion.div whileHover={{ scale: 1.05, y: -5 }} className="bg-white rounded-xl border border-black/8 shadow-sm-static p-4 rounded-xl border-l-4 border-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Total</p>
-                <p className="text-2xl font-black text-foreground">{stats.total}</p>
-              </div>
-              <BarChart3 className="w-8 h-8 text-blue-500" strokeWidth={1.5} />
-            </div>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05, y: -5 }} className="bg-white rounded-xl border border-black/8 shadow-sm-static p-4 rounded-xl border-l-4 border-emerald-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Resueltos</p>
-                <p className="text-2xl font-black text-emerald-400">{stats.resolved + stats.closed}</p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-emerald-500" strokeWidth={1.5} />
-            </div>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05, y: -5 }} className="bg-white rounded-xl border border-black/8 shadow-sm-static p-4 rounded-xl border-l-4 border-amber-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Pendientes</p>
-                <p className="text-2xl font-black text-amber-400">{stats.received + stats.inProgress}</p>
-              </div>
-              <Clock className="w-8 h-8 text-amber-500" strokeWidth={1.5} />
-            </div>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05, y: -5 }} className="bg-white rounded-xl border border-black/8 shadow-sm-static p-4 rounded-xl border-l-4 border-violet-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Resolución</p>
-                <p className="text-2xl font-black text-violet-400">{stats.resolutionRate}%</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-violet-500" strokeWidth={1.5} />
-            </div>
-          </motion.div>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {summaryCards.map((card, index) => {
+            const CardIcon = card.icon;
+            return (
+              <motion.div
+                key={card.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`${basePanelClass} p-4`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">{card.label}</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-2">{card.value}</p>
+                  </div>
+                  <CardIcon className={`w-5 h-5 ${card.iconClass}`} strokeWidth={1.8} />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </motion.div>
 
-      {/* Tabs */}
-      {(
-        <div className="flex gap-2 overflow-x-auto pb-2">
+      {hasFullAccess && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {[
             { id: 'lista', label: 'Lista', icon: ClipboardList },
-            { id: 'analisis', label: 'Análisis', icon: BarChart3 },
-            { id: 'estadisticas', label: 'Estadísticas', icon: PieChart },
-          ].map(tab => {
+            { id: 'analisis', label: 'Analisis', icon: BarChart3 },
+            { id: 'estadisticas', label: 'Estadisticas', icon: PieChart },
+          ].map((tab) => {
             const TabIcon = tab.icon;
             return (
-            <motion.button
-              key={tab.id}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`relative px-6 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-primary/40 to-primary/20 text-primary border border-primary/50 shadow-lg'
-                  : 'text-muted-foreground hover:text-foreground bg-white/5 border border-white/10'
-              }`}
-            >
-              <TabIcon className="w-5 h-5" strokeWidth={1.5} />
-              <span>{tab.label}</span>
-            </motion.button>
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <TabIcon className="w-4 h-4 inline mr-2" />
+                {tab.label}
+              </button>
             );
           })}
         </div>
       )}
 
       <AnimatePresence mode="wait">
-      {/* Analysis View */}
-      {activeTab === 'analisis' && hasFullAccess && (
-        <motion.div key="analisis" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          {/* Priority Analysis */}
-          <div className="bg-white rounded-xl border border-black/8 shadow-sm-static p-6 rounded-2xl border border-white/10">
-            <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-500" strokeWidth={1.5} />
-              Análisis por Prioridad
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {Object.entries(stats.byPriority).map(([priority, count]) => {
-                const PriorityIcon = PRIORITY_MAP[priority]?.icon;
-                return (
-                <motion.div
-                  key={priority}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  className={`rounded-xl p-5 border-2 backdrop-blur-md ${
-                    priority === 'urgent' ? 'bg-gradient-to-br from-red-500/40 to-red-600/20 border-red-400/50' :
-                    priority === 'high' ? 'bg-gradient-to-br from-orange-500/40 to-orange-600/20 border-orange-400/50' :
-                    priority === 'medium' ? 'bg-gradient-to-br from-amber-500/40 to-amber-600/20 border-amber-400/50' :
-                    'bg-gradient-to-br from-blue-500/40 to-blue-600/20 border-blue-400/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-xs font-semibold text-gray-900">{PRIORITY_MAP[priority]?.label}</p>
-                      <p className="text-2xl font-black text-gray-900 mt-1">{count}</p>
-                    </div>
-                    <PriorityIcon className="w-8 h-8 text-gray-900 drop-shadow-lg" strokeWidth={1.5} />
-                  </div>
-                  <div className="w-full bg-white/20 rounded-full h-2">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${stats.total > 0 ? (count / stats.total) * 100 : 0}%` }}
-                      transition={{ duration: 1 }}
-                      className={`h-2 rounded-full ${
-                        priority === 'urgent' ? 'bg-red-300' :
-                        priority === 'high' ? 'bg-orange-300' :
-                        priority === 'medium' ? 'bg-amber-300' :
-                        'bg-blue-300'
-                      }`}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-900 mt-2 font-semibold">{stats.total > 0 ? Math.round((count / stats.total) * 100) : 0}% del total</p>
-                </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Category Analysis */}
-          <div className="bg-white rounded-xl border border-black/8 shadow-sm-static p-6 rounded-2xl border border-white/10">
-            <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-3">
-              <Filter className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              Análisis por Categoría
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {Object.entries(stats.byCategory).map(([category, count]) => {
-                const catInfo = CATEGORY_MAP[category];
-                const CatIcon = catInfo.icon;
-                return (
-                  <motion.div
-                    key={category}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    className={`bg-gradient-to-br ${catInfo.gradient} rounded-xl p-5 border border-white/40 backdrop-blur-md`}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-900">{catInfo.label}</p>
-                        <p className="text-2xl font-black text-gray-900 mt-1">{count}</p>
-                      </div>
-                      <CatIcon className="w-8 h-8 text-gray-900 drop-shadow-lg" strokeWidth={1.5} />
-                    </div>
-                    <div className="w-full bg-white/30 rounded-full h-2">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${stats.total > 0 ? (count / stats.total) * 100 : 0}%` }}
-                        transition={{ duration: 1 }}
-                        className="h-2 rounded-full bg-white"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-900 mt-2 font-semibold">{stats.total > 0 ? Math.round((count / stats.total) * 100) : 0}%</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Workflow Analysis */}
-          <div className="bg-white rounded-xl border border-black/8 shadow-sm-static p-6 rounded-2xl border border-white/10">
-            <h3 className="font-bold text-lg text-foreground mb-6 flex items-center gap-3">
-              <ArrowRight className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              Flujo de Trabajo
-            </h3>
-            <div className="flex items-center justify-between overflow-x-auto pb-4 gap-2">
-              {STATUS_FLOW.map((s, i) => {
-                const StatusIcon = STATUS_LABELS[s].icon;
-                return (
-                <div key={s} className="flex items-center flex-1 min-w-[100px]">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    className={`flex flex-col items-center flex-1 p-4 rounded-xl ${STATUS_LABELS[s].class} bg-white/5 border border-white/10`}
-                  >
-                    <StatusIcon className="w-6 h-6 mb-2" strokeWidth={1.5} />
-                    <p className="text-xl font-black">{s === 'received' ? stats.received : s === 'in_progress' ? stats.inProgress : s === 'escalated' ? stats.escalated : s === 'resolved' ? stats.resolved : stats.closed}</p>
-                    <p className="text-xs mt-1 text-center">{STATUS_LABELS[s].label}</p>
-                  </motion.div>
-                  {i < STATUS_FLOW.length - 1 && <ArrowRight className="w-5 h-5 text-muted-foreground mx-1 flex-shrink-0" strokeWidth={1.5} />}
-                </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Cases Needing Attention */}
-          {pqrs.filter(p => p.priority === 'urgent' || p.priority === 'high').length > 0 && (
-            <div className="bg-white rounded-xl border border-black/8 shadow-sm-static p-6 rounded-2xl border border-red-500/30">
-              <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-3">
-                <AlertTriangle className="w-6 h-6 text-red-500" strokeWidth={1.5} />
-                Casos Urgentes
+        {activeTab === 'analisis' && hasFullAccess && (
+          <motion.div key="analisis" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className={`${basePanelClass} p-6`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                Analisis por Prioridad
               </h3>
-              <div className="space-y-3">
-                {pqrs.filter(p => p.priority === 'urgent' || p.priority === 'high').slice(0, 5).map((p, idx) => {
-                  const Icon = PRIORITY_MAP[p.priority]?.icon;
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                {Object.entries(stats.byPriority).map(([priority, count]) => {
+                  const config = PRIORITY_MAP[priority as PQRS['priority']];
+                  const Icon = config.icon;
+                  const percent = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
                   return (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="p-4 bg-gradient-to-r from-red-500/20 to-red-500/5 rounded-lg border-l-4 border-red-500"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-bold text-foreground text-sm">{p.subject}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{p.resident} - {CATEGORY_MAP[p.category]?.label}</p>
+                    <div key={priority} className={`${basePanelClass} p-4`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-xs uppercase tracking-wide text-gray-500">{config.label}</p>
+                          <p className="text-2xl font-bold text-gray-900 mt-1">{count}</p>
+                        </div>
+                        <Icon className={`w-5 h-5 ${config.textClass}`} />
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap flex items-center gap-1 ${PRIORITY_MAP[p.priority]?.class}`}>
-                        <Icon className="w-3.5 h-3.5" strokeWidth={1.5} />
-                        {PRIORITY_MAP[p.priority]?.label}
+                      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percent}%` }}
+                          transition={{ duration: 0.6 }}
+                          className={`h-full ${config.softClass}`}
+                        />
                       </div>
+                      <p className="text-xs text-gray-400 mt-2">{percent}% del total</p>
                     </div>
-                  </motion.div>
                   );
                 })}
               </div>
             </div>
-          )}
-        </motion.div>
-      )}
 
-      {/* Statistics View */}
-      {activeTab === 'estadisticas' && hasFullAccess && (
-        <motion.div key="estadisticas" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          {/* Status Overview */}
-          <div className="bg-white rounded-xl border border-black/8 shadow-sm-static p-6 rounded-2xl border border-white/10">
-            <h3 className="font-bold text-lg text-foreground mb-5 flex items-center gap-3">
-              <BarChart3 className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              Estado General
-            </h3>
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-              {STATUS_FLOW.map(s => {
-                const count = s === 'received' ? stats.received : s === 'in_progress' ? stats.inProgress : s === 'escalated' ? stats.escalated : s === 'resolved' ? stats.resolved : stats.closed;
-                const StatusIcon = STATUS_LABELS[s].icon;
-                return (
-                  <motion.div
-                    key={s}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    className={`text-center p-5 rounded-xl border-2 ${STATUS_LABELS[s].class} bg-white/5 border-white/20 backdrop-blur-sm`}
-                  >
-                    <StatusIcon className="w-6 h-6 mx-auto mb-2" strokeWidth={1.5} />
-                    <p className="text-2xl font-black text-white">{count}</p>
-                    <p className="text-xs text-white/80 mt-2">{STATUS_LABELS[s].label}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Category Distribution */}
-          <div className="bg-white rounded-xl border border-black/8 shadow-sm-static p-6 rounded-2xl border border-white/10">
-            <h3 className="font-bold text-lg text-foreground mb-5 flex items-center gap-3">
-              <Filter className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              Distribución por Categoría
-            </h3>
-            <div className="space-y-4">
-              {Object.entries(stats.byCategory).map(([category, count]) => {
-                const catInfo = CATEGORY_MAP[category];
-                const CatIcon = catInfo.icon;
-                return (
-                  <div key={category}>
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`p-2 rounded-lg bg-gradient-to-br ${catInfo.gradient}`}>
-                          <CatIcon className="w-4 h-4 text-white" strokeWidth={1.5} />
+            <div className={`${basePanelClass} p-6`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Filter className="w-5 h-5 text-primary" />
+                Analisis por Categoria
+              </h3>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                {Object.entries(stats.byCategory).map(([category, count]) => {
+                  const config = CATEGORY_MAP[category as PQRS['category']];
+                  const Icon = config.icon;
+                  const percent = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
+                  return (
+                    <div key={category} className={`${basePanelClass} p-4`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-xs uppercase tracking-wide text-gray-500">{config.label}</p>
+                          <p className="text-2xl font-bold text-gray-900 mt-1">{count}</p>
                         </div>
-                        <span className="text-sm font-semibold text-foreground">{catInfo.label}</span>
+                        <Icon className="w-5 h-5 text-gray-400" />
                       </div>
-                      <span className="text-sm font-black text-primary">{count}</span>
+                      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percent}%` }}
+                          transition={{ duration: 0.6 }}
+                          className="h-full bg-primary/25"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">{percent}% del total</p>
                     </div>
-                    <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${stats.total > 0 ? (count / stats.total) * 100 : 0}%` }}
-                        transition={{ duration: 1, delay: 0.1 }}
-                        className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-400"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">{stats.total > 0 ? Math.round((count / stats.total) * 100) : 0}% del total</p>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Priority Distribution */}
-          <div className="bg-white rounded-xl border border-black/8 shadow-sm-static p-6 rounded-2xl border border-white/10">
-            <h3 className="font-bold text-lg text-foreground mb-5 flex items-center gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-500" strokeWidth={1.5} />
-              Distribución por Prioridad
-            </h3>
-            <div className="space-y-4">
-              {Object.entries(stats.byPriority).map(([priority, count]) => {
-                const PriorityIcon = PRIORITY_MAP[priority]?.icon;
-                return (
-                <div key={priority}>
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className={`p-2 rounded-lg ${
-                        priority === 'urgent' ? 'bg-red-500/30' :
-                        priority === 'high' ? 'bg-orange-500/30' :
-                        priority === 'medium' ? 'bg-amber-500/30' :
-                        'bg-blue-500/30'
-                      }`}>
-                        <PriorityIcon className="w-4 h-4 text-white" strokeWidth={1.5} />
-                      </div>
-                      <span className="text-sm font-semibold text-foreground">{PRIORITY_MAP[priority]?.label}</span>
+            <div className={`${basePanelClass} p-6`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                <ArrowRight className="w-5 h-5 text-primary" />
+                Flujo de Trabajo
+              </h3>
+              <div className="grid gap-3 md:grid-cols-5">
+                {STATUS_FLOW.map((status) => {
+                  const config = STATUS_LABELS[status];
+                  const Icon = config.icon;
+                  const count =
+                    status === 'received'
+                      ? stats.received
+                      : status === 'in_progress'
+                        ? stats.inProgress
+                        : status === 'escalated'
+                          ? stats.escalated
+                          : status === 'resolved'
+                            ? stats.resolved
+                            : stats.closed;
+                  return (
+                    <div key={status} className={`${config.toneClass} border border-gray-200 rounded-xl p-4`}>
+                      <Icon className="w-5 h-5 text-gray-500 mb-3" />
+                      <p className="text-2xl font-bold text-gray-900">{count}</p>
+                      <p className="text-xs text-gray-500 mt-1">{config.label}</p>
                     </div>
-                    <span className={`text-sm font-black ${PRIORITY_MAP[priority]?.class}`}>{count}</span>
-                  </div>
-                  <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${stats.total > 0 ? (count / stats.total) * 100 : 0}%` }}
-                      transition={{ duration: 1, delay: 0.1 }}
-                      className={`h-full rounded-full ${
-                        priority === 'urgent' ? 'bg-gradient-to-r from-red-500 to-red-400' :
-                        priority === 'high' ? 'bg-gradient-to-r from-orange-500 to-orange-400' :
-                        priority === 'medium' ? 'bg-gradient-to-r from-amber-500 to-amber-400' :
-                        'bg-gradient-to-r from-blue-500 to-blue-400'
-                      }`}
+                  );
+                })}
+              </div>
+            </div>
+
+            {pqrs.filter((item) => item.priority === 'urgent' || item.priority === 'high').length > 0 && (
+              <div className={`${basePanelClass} p-6`}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-red-500" />
+                  Casos de Atencion Prioritaria
+                </h3>
+                <div className="space-y-3">
+                  {pqrs
+                    .filter((item) => item.priority === 'urgent' || item.priority === 'high')
+                    .slice(0, 5)
+                    .map((item) => {
+                      const priority = PRIORITY_MAP[item.priority];
+                      const PriorityIcon = priority.icon;
+                      return (
+                        <div
+                          key={item.id}
+                          className={`bg-white border border-gray-200 rounded-xl p-4 shadow-sm border-l-[3px] ${priority.borderClass}`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-base font-semibold text-gray-900">{item.subject}</p>
+                              <p className="text-sm text-gray-500 mt-1">{item.resident} · Apto {item.unit}</p>
+                            </div>
+                            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${priority.className}`}>
+                              <PriorityIcon className="w-3 h-3" />
+                              {priority.label}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {activeTab === 'estadisticas' && hasFullAccess && (
+          <motion.div key="estadisticas" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className={`${basePanelClass} p-6`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                Estado General
+              </h3>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                {STATUS_FLOW.map((status) => {
+                  const config = STATUS_LABELS[status];
+                  const Icon = config.icon;
+                  const count =
+                    status === 'received'
+                      ? stats.received
+                      : status === 'in_progress'
+                        ? stats.inProgress
+                        : status === 'escalated'
+                          ? stats.escalated
+                          : status === 'resolved'
+                            ? stats.resolved
+                            : stats.closed;
+                  return (
+                    <div key={status} className={`${config.className} rounded-xl p-4 text-center`}>
+                      <Icon className="w-5 h-5 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-gray-900">{count}</p>
+                      <p className="text-xs mt-1">{config.label}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className={`${basePanelClass} p-6`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                <Filter className="w-5 h-5 text-primary" />
+                Distribucion por Categoria
+              </h3>
+              <div className="space-y-4">
+                {Object.entries(stats.byCategory).map(([category, count]) => {
+                  const config = CATEGORY_MAP[category as PQRS['category']];
+                  const CategoryIcon = config.icon;
+                  const percent = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
+                  return (
+                    <div key={category}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`rounded-lg p-2 ${config.className}`}>
+                            <CategoryIcon className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{config.label}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900">{count}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percent}%` }}
+                          transition={{ duration: 0.6 }}
+                          className="h-full bg-primary/25"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">{percent}% del total</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className={`${basePanelClass} p-6`}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                Distribucion por Prioridad
+              </h3>
+              <div className="space-y-4">
+                {Object.entries(stats.byPriority).map(([priority, count]) => {
+                  const config = PRIORITY_MAP[priority as PQRS['priority']];
+                  const PriorityIcon = config.icon;
+                  const percent = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
+                  return (
+                    <div key={priority}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`rounded-lg p-2 ${config.className}`}>
+                            <PriorityIcon className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{config.label}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900">{count}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percent}%` }}
+                          transition={{ duration: 0.6 }}
+                          className={`h-full ${config.softClass}`}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">{percent}% del total</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {(activeTab === 'lista' || !hasFullAccess) && (
+          <motion.div key="lista" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+            {hasFullAccess && (
+              <div className={`${basePanelClass} p-4`}>
+                <div className="flex flex-wrap gap-3">
+                  <div className="relative flex-1 min-w-[220px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Buscar por asunto, nombre o apartamento"
+                      className="w-full h-10 pl-10 pr-4 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">{stats.total > 0 ? Math.round((count / stats.total) * 100) : 0}% del total</p>
-                </div>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* List View */}
-      {(activeTab === 'lista' || !hasFullAccess) && (
-        <>
-          {/* Filters */}
-          {hasFullAccess && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl border border-black/8 shadow-sm-static p-4 mb-6 rounded-xl border border-white/10">
-              <div className="flex flex-wrap gap-3">
-                <div className="flex-1 min-w-[200px] flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 border border-white/10">
-                  <Search className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-                  <input
-                    type="text"
-                    placeholder="Buscar..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-transparent border-0 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none w-full"
-                  />
-                </div>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="all">Todos estados</option>
-                  {STATUS_FLOW.map(s => (
-                    <option key={s} value={s}>{STATUS_LABELS[s].label}</option>
-                  ))}
-                </select>
-                <select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="all">Todas prioridades</option>
-                  {Object.entries(PRIORITY_MAP).map(([key, val]) => (
-                    <option key={key} value={key}>{val.label}</option>
-                  ))}
-                </select>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="all">Todas categorías</option>
-                  {Object.entries(CATEGORY_MAP).map(([key, val]) => (
-                    <option key={key} value={key}>{val.label}</option>
-                  ))}
-                </select>
-              </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                Mostrando <span className="font-bold text-primary">{filteredPQRS.length}</span> de <span className="font-bold">{pqrs.length}</span> registros
-              </p>
-            </motion.div>
-          )}
-
-          {/* PQRS List */}
-          <div className="space-y-3">
-            {(hasFullAccess ? filteredPQRS : pqrs).length === 0 ? (
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12 bg-white rounded-xl border border-black/8 shadow-sm-static rounded-2xl p-8">
-                <ClipboardList className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-30" strokeWidth={1.5} />
-                <p className="text-muted-foreground">No hay PQRS con los filtros aplicados</p>
-              </motion.div>
-            ) : (
-              (hasFullAccess ? filteredPQRS : pqrs).map((p, i) => {
-                const catInfo = CATEGORY_MAP[p.category];
-                const StatusIcon = STATUS_LABELS[p.status].icon;
-                const PriorityIcon = PRIORITY_MAP[p.priority]?.icon;
-                return (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    whileHover={{ y: -3, boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
-                    onClick={() => {
-                      setSelectedPQRS(p);
-                      setComments([
-                        { id: '1', author: 'Admin', text: 'Se ha recibido la solicitud. En proceso de evaluación.', date: '2025-05-24 10:30', avatar: '👨‍💼' },
-                        { id: '2', author: p.resident, text: 'Requiero que sea atendido lo antes posible', date: '2025-05-24 11:00', avatar: '👤' },
-                      ]);
-                    }}
-                    className={`bg-white rounded-[12px] border border-[#E5E7EB] p-6 shadow-sm rounded-xl border-l-4 group cursor-pointer transition-all ${
-                      p.priority === 'urgent' ? 'border-l-red-500 hover:shadow-red-500/10' :
-                      p.priority === 'high' ? 'border-l-orange-500 hover:shadow-orange-500/10' :
-                      p.priority === 'medium' ? 'border-l-amber-500 hover:shadow-amber-500/10' :
-                      'border-l-blue-500 hover:shadow-blue-500/10'
-                    }`}
+                  <select
+                    value={statusFilter}
+                    onChange={(event) => setStatusFilter(event.target.value)}
+                    className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className="text-xs font-mono bg-white/10 px-2.5 py-1 rounded-lg text-primary">{p.ticket}</span>
-                          <motion.div whileHover={{ scale: 1.1 }} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${STATUS_LABELS[p.status].class} bg-white/10`}>
-                            <StatusIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
-                            {STATUS_LABELS[p.status].label}
-                          </motion.div>
-                          <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${PRIORITY_MAP[p.priority].class}`}>
-                            <PriorityIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
-                            {PRIORITY_MAP[p.priority].label}
-                          </span>
-                          <span className="text-xs bg-white/10 px-2.5 py-1 rounded-lg text-white/80">{catInfo.label}</span>
-                        </div>
-                        <h3 className="font-bold text-foreground mb-2 line-clamp-2">{p.subject}</h3>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{p.description}</p>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <span>{p.resident}</span>
-                          <span>-</span>
-                          <span>Apto {p.unit}</span>
-                          <span>-</span>
-                          <span>{p.date}</span>
-                          {p.assignedTo && (
-                            <>
-                              <span>-</span>
-                              <span className="text-primary font-semibold">Asignado: {p.assignedTo}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      {canAdvance && p.status !== 'closed' && (
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => advanceStatus(p.id, p.status)}
-                          className="btn-premium px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 whitespace-nowrap flex-shrink-0"
-                        >
-                          Avanzar <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
-                        </motion.button>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })
+                    <option value="all">Todos los estados</option>
+                    {STATUS_FLOW.map((status) => (
+                      <option key={status} value={status}>
+                        {STATUS_LABELS[status].label}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={priorityFilter}
+                    onChange={(event) => setPriorityFilter(event.target.value)}
+                    className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="all">Todas las prioridades</option>
+                    {Object.entries(PRIORITY_MAP).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={categoryFilter}
+                    onChange={(event) => setCategoryFilter(event.target.value)}
+                    className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="all">Todas las categorias</option>
+                    {Object.entries(CATEGORY_MAP).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="text-xs text-gray-400 mt-3">
+                  Mostrando <span className="font-semibold text-gray-900">{visiblePQRS.length}</span> de{' '}
+                  <span className="font-semibold text-gray-900">{pqrs.length}</span> registros
+                </p>
+              </div>
             )}
-          </div>
-        </>
-      )}
-      </AnimatePresence>
 
-      {/* PQRS Detail Modal */}
-      {selectedPQRS && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto p-4">
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-96 overflow-y-auto my-8">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground mb-1">{selectedPQRS.subject}</h2>
-                <p className="text-xs text-muted-foreground">{selectedPQRS.ticket}</p>
-              </div>
-              <button onClick={() => setSelectedPQRS(null)} className="text-muted-foreground hover:text-foreground"><XCircle className="w-6 h-6" /></button>
-            </div>
+            <div className="space-y-3">
+              {visiblePQRS.length === 0 ? (
+                <div className={`${basePanelClass} p-10 text-center`}>
+                  <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm text-gray-500">No hay PQRS con los filtros aplicados</p>
+                </div>
+              ) : (
+                visiblePQRS.map((item, index) => {
+                  const status = STATUS_LABELS[item.status];
+                  const priority = PRIORITY_MAP[item.priority];
+                  const category = CATEGORY_MAP[item.category];
+                  const StatusIcon = status.icon;
+                  const PriorityIcon = priority.icon;
+                  const CategoryIcon = category.icon;
+                  return (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.04 }}
+                      whileHover={{ y: -2 }}
+                      onClick={() => {
+                        setSelectedPQRS(item);
+                        setComments([
+                          {
+                            id: '1',
+                            author: 'Administracion',
+                            text: 'Se ha recibido la solicitud y ya fue asignada para validacion.',
+                            date: '2026-05-24 10:30',
+                            avatar: 'A',
+                          },
+                          {
+                            id: '2',
+                            author: item.resident,
+                            text: 'Agradezco la revision y quedo atento a la gestion.',
+                            date: '2026-05-24 11:00',
+                            avatar: 'R',
+                          },
+                        ]);
+                      }}
+                      className={`${basePanelClass} p-4 border-l-[3px] ${priority.borderClass} cursor-pointer`}
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
+                            <span className="text-xs font-mono text-gray-400">{item.ticket}</span>
+                            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}>
+                              <StatusIcon className="w-3 h-3" />
+                              {status.label}
+                            </span>
+                            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${priority.className}`}>
+                              <PriorityIcon className="w-3 h-3" />
+                              {priority.label}
+                            </span>
+                            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${category.className}`}>
+                              <CategoryIcon className="w-3 h-3" />
+                              {category.label}
+                            </span>
+                          </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Estado</p>
-                <p className="text-sm font-bold text-foreground">{STATUS_LABELS[selectedPQRS.status].label}</p>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Prioridad</p>
-                <p className="text-sm font-bold">{PRIORITY_MAP[selectedPQRS.priority].label}</p>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Residente</p>
-                <p className="text-sm font-bold text-foreground">{selectedPQRS.resident}</p>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Fecha</p>
-                <p className="text-sm font-bold text-foreground">{selectedPQRS.date}</p>
-              </div>
-            </div>
+                          <h3 className="text-base font-semibold text-gray-900">{item.subject}</h3>
+                          <p className="text-sm text-gray-500 line-clamp-2 mt-2">{item.description}</p>
 
-            {/* Timeline */}
-            <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-bold text-sm mb-3">Historial de Estados</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex gap-3"><div className="w-3 h-3 rounded-full bg-green-500 mt-1 flex-shrink-0"></div><div><p className="font-semibold">Recibido</p><p className="text-xs text-muted-foreground">2025-05-24 09:00 AM</p></div></div>
-                <div className="flex gap-3"><div className="w-3 h-3 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div><div><p className="font-semibold">En Proceso</p><p className="text-xs text-muted-foreground">2025-05-24 10:15 AM</p></div></div>
-              </div>
-            </div>
+                          <div className="flex flex-wrap items-center gap-1 text-xs text-gray-400 mt-3">
+                            <span>{item.resident}</span>
+                            <span>·</span>
+                            <span>Apto {item.unit}</span>
+                            <span>·</span>
+                            <span>{item.date}</span>
+                            {item.assignedTo && (
+                              <>
+                                <span>·</span>
+                                <span>{item.assignedTo}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
 
-            {/* Comments */}
-            <div className="mb-4">
-              <h4 className="font-bold text-sm mb-3">Comentarios</h4>
-              <div className="space-y-3 max-h-40 overflow-y-auto mb-3">
-                {comments.map(comment => (
-                  <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
-                    <div className="flex items-start gap-2 mb-1">
-                      <span className="text-lg">{comment.avatar}</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-foreground">{comment.author}</p>
-                        <p className="text-xs text-muted-foreground">{comment.date}</p>
+                        {canAdvance && item.status !== 'closed' && (
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              advanceStatus(item.id, item.status);
+                            }}
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-primary/90"
+                          >
+                            Avanzar
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
-                    </div>
-                    <p className="text-sm text-gray-700 ml-8">{comment.text}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-2 mb-3">
-                <input type="text" placeholder="Agregar comentario..." value={newComment} onChange={(e) => setNewComment(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                <button
-                  onClick={() => {
-                    if (newComment.trim()) {
-                      setComments([...comments, { id: String(Date.now()), author: 'Tú', text: newComment, date: new Date().toLocaleString('es-CO'), avatar: '👤' }]);
-                      setNewComment('');
-                    }
-                  }}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700"
-                >
-                  Comentar
-                </button>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={() => setSelectedPQRS(null)} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50">Cerrar</button>
-              {canAdvance && selectedPQRS.status !== 'closed' && (
-                <button onClick={() => { advanceStatus(selectedPQRS.id, selectedPQRS.status); setSelectedPQRS(null); }} className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700">Avanzar Estado</button>
+                    </motion.div>
+                  );
+                })
               )}
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {selectedPQRS && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 bg-black/40 p-4 overflow-y-auto">
+          <div className="min-h-full flex items-center justify-center">
+            <motion.div
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl"
+            >
+              <div className="flex items-start justify-between gap-4 mb-5">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{selectedPQRS.subject}</h2>
+                  <p className="text-xs font-mono text-gray-400 mt-1">{selectedPQRS.ticket}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedPQRS(null)}
+                  className="rounded-lg p-1 text-gray-400 transition-colors hover:text-gray-700"
+                >
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-6">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Estado</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{STATUS_LABELS[selectedPQRS.status].label}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Prioridad</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{PRIORITY_MAP[selectedPQRS.priority].label}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Residente</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{selectedPQRS.resident}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Fecha</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{selectedPQRS.date}</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Historial de estados</h4>
+                <div className="space-y-3 text-sm">
+                  <div className="flex gap-3">
+                    <div className="mt-1 h-3 w-3 rounded-full bg-blue-500" />
+                    <div>
+                      <p className="font-medium text-gray-900">Recibido</p>
+                      <p className="text-xs text-gray-400">2026-05-24 09:00</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="mt-1 h-3 w-3 rounded-full bg-amber-500" />
+                    <div>
+                      <p className="font-medium text-gray-900">En proceso</p>
+                      <p className="text-xs text-gray-400">2026-05-24 10:15</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-5">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Comentarios</h4>
+                <div className="space-y-3 max-h-44 overflow-y-auto mb-3">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
+                          {comment.avatar}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-sm font-semibold text-gray-900">{comment.author}</p>
+                            <p className="text-xs text-gray-400">{comment.date}</p>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">{comment.text}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newComment}
+                    onChange={(event) => setNewComment(event.target.value)}
+                    placeholder="Agregar comentario..."
+                    className="flex-1 h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!newComment.trim()) return;
+                      setComments((current) => [
+                        ...current,
+                        {
+                          id: String(Date.now()),
+                          author: 'Tu',
+                          text: newComment,
+                          date: new Date().toLocaleString('es-CO'),
+                          avatar: 'T',
+                        },
+                      ]);
+                      setNewComment('');
+                    }}
+                    className="rounded-xl bg-primary px-4 text-sm font-medium text-white hover:bg-primary/90"
+                  >
+                    Comentar
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedPQRS(null)}
+                  className="flex-1 h-10 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cerrar
+                </button>
+                {canAdvance && selectedPQRS.status !== 'closed' && (
+                  <button
+                    onClick={() => {
+                      advanceStatus(selectedPQRS.id, selectedPQRS.status);
+                      setSelectedPQRS(null);
+                    }}
+                    className="flex-1 h-10 rounded-xl bg-primary text-sm font-medium text-white hover:bg-primary/90"
+                  >
+                    Avanzar estado
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </div>

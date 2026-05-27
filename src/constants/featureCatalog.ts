@@ -331,6 +331,10 @@ export const FEATURE_CATALOG: Record<FeatureModuleId, FeatureDefinition[]> = {
   ],
 };
 
+FEATURE_CATALOG.security.forEach((feature) => {
+  feature.access.consejo = 'READ_ONLY';
+});
+
 export const ALL_FEATURES = Object.values(FEATURE_CATALOG).flat();
 
 export const FEATURE_BY_ID = Object.fromEntries(
