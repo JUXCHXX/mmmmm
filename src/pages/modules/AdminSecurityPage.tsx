@@ -4,284 +4,282 @@ import { useAuthStore } from '@/store/useAuthStore';
 import {
   ShieldCheck, Users, Lock, Key, Activity, Trash2, Plus, Edit, Eye, EyeOff,
   CheckCircle, AlertCircle, Clock, User, Mail, Globe, Smartphone, ArrowUpRight,
-  ArrowDownLeft, Search, Filter, Download, RefreshCw
+  ArrowDownLeft, Search, Filter, Download, RefreshCw, MapPin, Car, Calendar, FileText,
+  Bell, AlertTriangle, Home, LogOut, PackageOpen, Zap, Settings2, BarChart3, TrendingUp
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, LineChart, Line } from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
-interface SystemUser {
+interface AccessRecord {
   id: string;
-  name: string;
-  email: string;
-  role: 'super_admin' | 'admin' | 'consejo' | 'propietario' | 'arrendatario' | 'porteria' | 'proveedor';
-  status: 'active' | 'inactive' | 'suspended';
-  lastAccess: string;
-  createdAt: string;
-  ipAddresses: string[];
-  lastIp: string;
+  hora: string;
+  nombre: string;
+  documento: string;
+  tipo: 'residente' | 'visitante' | 'proveedor' | 'empleado';
+  destino: string;
+  ingreso: string;
+  salida: string;
+  tiempo: string;
+  registradoPor: string;
 }
 
-interface RolePermission {
+interface Visitante {
   id: string;
-  role: string;
-  module: string;
-  permissions: ('view' | 'create' | 'edit' | 'delete')[];
-  granted: boolean;
+  nombre: string;
+  documento: string;
+  apto: string;
+  horaEsperada: string;
+  estado: 'esperado' | 'ingresado' | 'cancelado';
+  invitadoPor: string;
 }
 
-interface AuditLog {
+interface Vehiculo {
   id: string;
-  user: string;
-  action: string;
-  module: string;
-  timestamp: string;
-  status: 'success' | 'failed';
-  ip: string;
-  details: string;
-  severity: 'info' | 'warning' | 'error';
+  placa: string;
+  marca: string;
+  color: string;
+  propietario: string;
+  apto: string;
+  parqueadero: string;
+  estado: 'dentro' | 'fuera';
 }
 
-interface SecurityPolicy {
+interface TurnoPorteria {
   id: string;
-  name: string;
-  description: string;
-  category: 'password' | 'session' | '2fa' | 'ip_whitelist' | 'encryption';
-  status: 'active' | 'inactive';
-  value: string;
-  lastModified: string;
-  modifiedBy: string;
+  nombre: string;
+  turno: 'mañana' | 'tarde' | 'noche';
+  horaInicio: string;
+  horaFin: string;
+  novedades: number;
 }
 
-// SAMPLE DATA
-const SAMPLE_USERS: SystemUser[] = [
+interface Novedad {
+  id: string;
+  hora: string;
+  descripcion: string;
+  tipo: 'info' | 'warning' | 'alert';
+}
+
+// DEMO DATA
+const DEMO_ACCESOS: AccessRecord[] = [
   {
     id: '1',
-    name: 'Juan Administrador',
-    email: 'juan@bunty.com',
-    role: 'admin',
-    status: 'active',
-    lastAccess: '5 min',
-    createdAt: '2024-01-15',
-    ipAddresses: ['192.168.1.100', '192.168.1.101'],
-    lastIp: '192.168.1.100'
+    hora: '09:15',
+    nombre: 'Juan Pérez',
+    documento: '1051234567',
+    tipo: 'visitante',
+    destino: 'Apto 302',
+    ingreso: '09:15',
+    salida: '',
+    tiempo: '2 horas 30 min',
+    registradoPor: 'Portería',
   },
   {
     id: '2',
-    name: 'Maria Porteria',
-    email: 'maria@bunty.com',
-    role: 'porteria',
-    status: 'active',
-    lastAccess: '2 hours',
-    createdAt: '2024-02-01',
-    ipAddresses: ['192.168.1.50'],
-    lastIp: '192.168.1.50'
+    hora: '09:30',
+    nombre: 'ServiFix (Proveedor)',
+    documento: 'RUT-890123456',
+    tipo: 'proveedor',
+    destino: 'Apto 101',
+    ingreso: '09:30',
+    salida: '10:00',
+    tiempo: '30 min',
+    registradoPor: 'Portería',
   },
   {
     id: '3',
-    name: 'Carlos Consejo',
-    email: 'carlos@bunty.com',
-    role: 'consejo',
-    status: 'inactive',
-    lastAccess: '1 week',
-    createdAt: '2024-01-20',
-    ipAddresses: ['192.168.1.75'],
-    lastIp: '192.168.1.75'
+    hora: '10:00',
+    nombre: 'Ana García',
+    documento: '1051234568',
+    tipo: 'residente',
+    destino: 'Torre 1',
+    ingreso: '10:00',
+    salida: '',
+    tiempo: 'Activo',
+    registradoPor: 'QR',
   },
   {
     id: '4',
-    name: 'Sandra Propietario',
-    email: 'sandra.p@bunty.com',
-    role: 'propietario',
-    status: 'active',
-    lastAccess: '30 min',
-    createdAt: '2024-02-10',
-    ipAddresses: ['192.168.1.85', '10.0.0.50'],
-    lastIp: '10.0.0.50'
+    hora: '10:45',
+    nombre: 'María López',
+    documento: '1051234569',
+    tipo: 'visitante',
+    destino: 'Apto 205',
+    ingreso: '10:45',
+    salida: '11:20',
+    tiempo: '35 min',
+    registradoPor: 'Portería',
   },
   {
     id: '5',
-    name: 'Roberto Proveedor',
-    email: 'r.proveedor@external.com',
-    role: 'proveedor',
-    status: 'suspended',
-    lastAccess: '3 days',
-    createdAt: '2024-03-01',
-    ipAddresses: ['203.0.113.100'],
-    lastIp: '203.0.113.100'
+    hora: '11:20',
+    nombre: 'ElectroServ',
+    documento: 'RUT-890123457',
+    tipo: 'proveedor',
+    destino: 'Apto 410',
+    ingreso: '11:20',
+    salida: '',
+    tiempo: 'En progreso',
+    registradoPor: 'Portería',
   },
   {
     id: '6',
-    name: 'Patricia Arrendatario',
-    email: 'patricia.arr@bunty.com',
-    role: 'arrendatario',
-    status: 'active',
-    lastAccess: '15 min',
-    createdAt: '2024-03-15',
-    ipAddresses: ['192.168.1.110'],
-    lastIp: '192.168.1.110'
-  },
-];
-
-const SAMPLE_AUDIT_LOGS: AuditLog[] = [
-  {
-    id: '1',
-    user: 'Juan Administrador',
-    action: 'Create User',
-    module: 'Admin - Usuarios',
-    timestamp: '2024-04-08 14:35:23',
-    status: 'success',
-    ip: '192.168.1.100',
-    details: 'Nuevo usuario: Maria Porteria',
-    severity: 'info'
-  },
-  {
-    id: '2',
-    user: 'Maria Porteria',
-    action: 'View Residents',
-    module: 'Residentes',
-    timestamp: '2024-04-08 14:30:15',
-    status: 'success',
-    ip: '192.168.1.50',
-    details: 'Consulta de residentes activos',
-    severity: 'info'
-  },
-  {
-    id: '3',
-    user: 'Unknown',
-    action: 'Failed Login',
-    module: 'Auth',
-    timestamp: '2024-04-08 14:25:00',
-    status: 'failed',
-    ip: '203.0.113.45',
-    details: 'Intento de login fallido - Contraseña incorrecta',
-    severity: 'warning'
-  },
-  {
-    id: '4',
-    user: 'Juan Administrador',
-    action: 'Delete User',
-    module: 'Admin - Usuarios',
-    timestamp: '2024-04-08 14:15:32',
-    status: 'success',
-    ip: '192.168.1.100',
-    details: 'Usuario eliminado: expired_account',
-    severity: 'warning'
-  },
-  {
-    id: '5',
-    user: 'Sandra Propietario',
-    action: 'Create Reservation',
-    module: 'Reservas',
-    timestamp: '2024-04-08 13:55:12',
-    status: 'success',
-    ip: '10.0.0.50',
-    details: 'Nueva reserva: Sala Común - 08/04/2024',
-    severity: 'info'
-  },
-  {
-    id: '6',
-    user: 'Roberto Proveedor',
-    action: 'Unauthorized Access',
-    module: 'Documentos',
-    timestamp: '2024-04-08 13:42:00',
-    status: 'failed',
-    ip: '203.0.113.100',
-    details: 'Intento de acceso denegado a módulo restringido',
-    severity: 'error'
+    hora: '11:45',
+    nombre: 'Carlos Ruiz',
+    documento: '1051234570',
+    tipo: 'residente',
+    destino: 'Torre 2',
+    ingreso: '11:45',
+    salida: '',
+    tiempo: 'Activo',
+    registradoPor: 'QR',
   },
   {
     id: '7',
-    user: 'Juan Administrador',
-    action: 'Update Policy',
-    module: 'Admin - Políticas',
-    timestamp: '2024-04-08 13:20:45',
-    status: 'success',
-    ip: '192.168.1.100',
-    details: 'Política de contraseña actualizada: min 12 caracteres',
-    severity: 'warning'
+    hora: '12:10',
+    nombre: 'Domino´s Pizza',
+    documento: 'RUT-890123458',
+    tipo: 'proveedor',
+    destino: 'Entrega',
+    ingreso: '12:10',
+    salida: '12:15',
+    tiempo: '5 min',
+    registradoPor: 'Portería',
   },
   {
     id: '8',
-    user: 'Patricia Arrendatario',
-    action: 'View Payment',
-    module: 'Pagos',
-    timestamp: '2024-04-08 12:50:30',
-    status: 'success',
-    ip: '192.168.1.110',
-    details: 'Consulta de cuota y pagos pendientes',
-    severity: 'info'
+    hora: '12:30',
+    nombre: 'Roberto Torres',
+    documento: '1051234571',
+    tipo: 'residente',
+    destino: 'Torre 3',
+    ingreso: '12:30',
+    salida: '',
+    tiempo: 'Activo',
+    registradoPor: 'QR',
   },
 ];
 
-const SECURITY_POLICIES: SecurityPolicy[] = [
+const DEMO_VISITANTES_ESPERADOS: Visitante[] = [
   {
     id: '1',
-    name: 'Contraseña Mínima',
-    description: 'Longitud mínima de contraseña',
-    category: 'password',
-    status: 'active',
-    value: '12 caracteres',
-    lastModified: '2024-03-15',
-    modifiedBy: 'Admin'
+    nombre: 'Juan Pérez',
+    documento: '1051234567',
+    apto: '302',
+    horaEsperada: '14:00',
+    estado: 'esperado',
+    invitadoPor: 'Ana García',
   },
   {
     id: '2',
-    name: 'Expiración de Sesión',
-    description: 'Tiempo máximo de sesión activa',
-    category: 'session',
-    status: 'active',
-    value: '30 minutos',
-    lastModified: '2024-03-10',
-    modifiedBy: 'Admin'
+    nombre: 'Carlos López',
+    documento: '1051234588',
+    apto: '205',
+    horaEsperada: '15:30',
+    estado: 'esperado',
+    invitadoPor: 'María López',
+  },
+];
+
+const DEMO_VEHICULOS: Vehiculo[] = [
+  {
+    id: '1',
+    placa: 'ABC123',
+    marca: 'Mazda 3',
+    color: 'Gris',
+    propietario: 'Luis Torres',
+    apto: '302',
+    parqueadero: 'P-12',
+    estado: 'dentro',
+  },
+  {
+    id: '2',
+    placa: 'DEF456',
+    marca: 'Toyota',
+    color: 'Blanco',
+    propietario: 'Ana García',
+    apto: '101',
+    parqueadero: 'P-5',
+    estado: 'fuera',
   },
   {
     id: '3',
-    name: 'Autenticación 2FA',
-    description: 'Requerir dos factores de autenticación',
-    category: '2fa',
-    status: 'active',
-    value: 'Habilitado para Super Admin',
-    lastModified: '2024-02-28',
-    modifiedBy: 'Admin'
+    placa: 'GHI789',
+    marca: 'Renault',
+    color: 'Rojo',
+    propietario: 'Carlos Ruiz',
+    apto: '205',
+    parqueadero: 'P-18',
+    estado: 'dentro',
   },
   {
     id: '4',
-    name: 'Control de IPs',
-    description: 'IPs autorizadas para acceso',
-    category: 'ip_whitelist',
-    status: 'inactive',
-    value: '5 IPs configuradas',
-    lastModified: '2024-02-15',
-    modifiedBy: 'Admin'
+    placa: 'JKL012',
+    marca: 'Chevrolet',
+    color: 'Negro',
+    propietario: 'M. Fernández',
+    apto: '412',
+    parqueadero: 'P-31',
+    estado: 'dentro',
   },
 ];
 
-const ROLE_PERMISSIONS: RolePermission[] = [
-  { id: '1', role: 'admin', module: 'Usuarios', permissions: ['view', 'create', 'edit'], granted: true },
-  { id: '2', role: 'admin', module: 'Roles', permissions: ['view', 'edit'], granted: true },
-  { id: '3', role: 'consejo', module: 'Usuarios', permissions: ['view'], granted: true },
-  { id: '4', role: 'porteria', module: 'Seguridad', permissions: ['view', 'edit'], granted: true },
-  { id: '5', role: 'propietario', module: 'Usuarios', permissions: [], granted: false },
+const DEMO_TURNOS: TurnoPorteria[] = [
+  {
+    id: '1',
+    nombre: 'Roberto Casas',
+    turno: 'mañana',
+    horaInicio: '06:00',
+    horaFin: '14:00',
+    novedades: 2,
+  },
+  {
+    id: '2',
+    nombre: 'Diana Moreno',
+    turno: 'tarde',
+    horaInicio: '14:00',
+    horaFin: '22:00',
+    novedades: 1,
+  },
+  {
+    id: '3',
+    nombre: 'Héctor Villada',
+    turno: 'noche',
+    horaInicio: '22:00',
+    horaFin: '06:00',
+    novedades: 0,
+  },
 ];
 
-const AUDIT_CHART_DATA = [
-  { time: '08:00', success: 45, failed: 2, warning: 5 },
-  { time: '10:00', success: 52, failed: 1, warning: 3 },
-  { time: '12:00', success: 38, failed: 3, warning: 7 },
-  { time: '14:00', success: 61, failed: 2, warning: 4 },
-  { time: '16:00', success: 55, failed: 4, warning: 6 },
-  { time: '18:00', success: 48, failed: 1, warning: 2 },
+const CHART_DATA_INGRESO_HORA = [
+  { hora: '06:00', ingresos: 2 },
+  { hora: '07:00', ingresos: 8 },
+  { hora: '08:00', ingresos: 12 },
+  { hora: '09:00', ingresos: 15 },
+  { hora: '10:00', ingresos: 10 },
+  { hora: '11:00', ingresos: 8 },
+  { hora: '12:00', ingresos: 6 },
+  { hora: '13:00', ingresos: 4 },
+  { hora: '14:00', ingresos: 7 },
+  { hora: '15:00', ingresos: 9 },
+  { hora: '16:00', ingresos: 11 },
+  { hora: '17:00', ingresos: 13 },
+  { hora: '18:00', ingresos: 14 },
 ];
+
+const CHART_DATA_TIPO_INGRESO = [
+  { name: 'Residentes', value: 65 },
+  { name: 'Visitantes', value: 25 },
+  { name: 'Proveedores', value: 10 },
+];
+
+const COLORS = ['#1E7EC8', '#00B5A0', '#F59E0B'];
 
 const AdminSecurityPage = () => {
   const user = useAuthStore((s) => s.user);
-  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'audit' | 'policies'>('users');
-  const [users, setUsers] = useState<SystemUser[]>(SAMPLE_USERS);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(SAMPLE_AUDIT_LOGS);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [auditSearchTerm, setAuditSearchTerm] = useState('');
-  const [showPassword, setShowPassword] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all');
+  const [activeTab, setActiveTab] = useState<'resumen' | 'bitacora' | 'visitantes' | 'vehiculos' | 'personal' | 'reportes' | 'configuracion'>('resumen');
+  const [searchBitacora, setSearchBitacora] = useState('');
+  const [filterTipo, setFilterTipo] = useState<'todos' | 'residente' | 'visitante' | 'proveedor' | 'empleado'>('todos');
 
   if (!user || (user.roleId !== 'super_admin' && user.roleId !== 'admin')) {
     return (
@@ -293,36 +291,17 @@ const AdminSecurityPage = () => {
     );
   }
 
-  // Gestión de Usuarios
-  const handleSuspendUser = (userId: string) => {
-    setUsers(users.map(u => u.id === userId ? { ...u, status: 'suspended' as const } : u));
-    toast({ title: 'Usuario suspendido', description: 'El acceso ha sido bloqueado' });
-  };
-
-  const handleReactivateUser = (userId: string) => {
-    setUsers(users.map(u => u.id === userId ? { ...u, status: 'active' as const } : u));
-    toast({ title: 'Usuario reactivado', description: 'El acceso ha sido restaurado' });
-  };
-
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter(u => u.id !== userId));
-    toast({ title: 'Usuario eliminado', description: 'El usuario ha sido removido del sistema' });
-  };
-
-  // Filtrado de usuarios
-  const filteredUsers = users.filter(u => {
-    const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         u.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || u.status === filterStatus;
-    return matchesSearch && matchesStatus;
+  const filteredAccesos = DEMO_ACCESOS.filter(a => {
+    const matchSearch = a.nombre.toLowerCase().includes(searchBitacora.toLowerCase()) ||
+                       a.documento.toLowerCase().includes(searchBitacora.toLowerCase());
+    const matchTipo = filterTipo === 'todos' || a.tipo === filterTipo;
+    return matchSearch && matchTipo;
   });
 
-  // Filtrado de logs
-  const filteredAuditLogs = auditLogs.filter(log =>
-    log.user.toLowerCase().includes(auditSearchTerm.toLowerCase()) ||
-    log.action.toLowerCase().includes(auditSearchTerm.toLowerCase()) ||
-    log.module.toLowerCase().includes(auditSearchTerm.toLowerCase())
-  );
+  const conteoVehiculos = {
+    dentro: DEMO_VEHICULOS.filter(v => v.estado === 'dentro').length,
+    total: DEMO_VEHICULOS.length,
+  };
 
   return (
     <div className="space-y-6 pb-6">
@@ -332,175 +311,236 @@ const AdminSecurityPage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-gradient-to-r from-[#0D2B4E] to-[#1E7EC8] rounded-xl p-6 text-white"
       >
-        <div className="flex items-center gap-4 mb-2">
-          <ShieldCheck className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Seguridad del Sistema</h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-4">
+            <ShieldCheck className="w-8 h-8" />
+            <div>
+              <h1 className="text-3xl font-bold">Seguridad y Acceso</h1>
+              <p className="text-blue-100">Control total del conjunto · Administrador</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 transition">
+              <Download className="w-4 h-4" />
+              Exportar Reporte
+            </button>
+            <button className="px-4 py-2 bg-[#00B5A0] hover:bg-[#00B5A0]/90 rounded-lg flex items-center gap-2 transition">
+              <Settings2 className="w-4 h-4" />
+              Configuración
+            </button>
+          </div>
         </div>
-        <p className="text-blue-100">Administración de usuarios, roles, permisos y políticas de seguridad</p>
       </motion.div>
 
       {/* Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="flex gap-2 p-4 border-b border-gray-200 flex-wrapper">
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition ${
-              activeTab === 'users'
-                ? 'bg-[#00B5A0] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            Usuarios
-          </button>
-          <button
-            onClick={() => setActiveTab('roles')}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition ${
-              activeTab === 'roles'
-                ? 'bg-[#00B5A0] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Key className="w-4 h-4" />
-            Roles y Permisos
-          </button>
-          <button
-            onClick={() => setActiveTab('audit')}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition ${
-              activeTab === 'audit'
-                ? 'bg-[#00B5A0] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Activity className="w-4 h-4" />
-            Auditoría
-          </button>
-          <button
-            onClick={() => setActiveTab('policies')}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition ${
-              activeTab === 'policies'
-                ? 'bg-[#00B5A0] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Lock className="w-4 h-4" />
-            Políticas
-          </button>
+        <div className="flex gap-2 p-4 border-b border-gray-200 overflow-x-auto flex-wrap">
+          {[
+            { id: 'resumen', label: 'Resumen', icon: BarChart3 },
+            { id: 'bitacora', label: 'Bitácora', icon: Activity },
+            { id: 'visitantes', label: 'Visitantes', icon: Users },
+            { id: 'vehiculos', label: 'Vehículos', icon: Car },
+            { id: 'personal', label: 'Personal', icon: User },
+            { id: 'reportes', label: 'Reportes', icon: FileText },
+            { id: 'configuracion', label: 'Configuración', icon: Settings2 },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-[#00B5A0] text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content */}
         <div className="p-6">
-          {/* Gestión de Usuarios */}
-          {activeTab === 'users' && (
-            <motion.div
-              key="users"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
-            >
-              <div className="flex gap-4 mb-6 flex-wrap items-center">
+          {/* RESUMEN */}
+          {activeTab === 'resumen' && (
+            <motion.div key="resumen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              {/* Metrics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-blue-600 text-sm font-medium">Ingresos hoy</p>
+                      <p className="text-3xl font-bold text-blue-900 mt-2">34</p>
+                      <p className="text-xs text-blue-600 mt-2">desde las 6:00 AM</p>
+                    </div>
+                    <LogOut className="w-8 h-8 text-blue-400" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 border border-teal-200">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-teal-600 text-sm font-medium">Visitantes activos</p>
+                      <p className="text-3xl font-bold text-teal-900 mt-2">8</p>
+                      <p className="text-xs text-teal-600 mt-2">actualmente en el conjunto</p>
+                    </div>
+                    <Users className="w-8 h-8 text-teal-400" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-purple-600 text-sm font-medium">Vehículos adentro</p>
+                      <p className="text-3xl font-bold text-purple-900 mt-2">{conteoVehiculos.dentro}/{conteoVehiculos.total}</p>
+                      <p className="text-xs text-purple-600 mt-2">de 48 parqueaderos</p>
+                    </div>
+                    <Car className="w-8 h-8 text-purple-400" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-red-600 text-sm font-medium">Novedades activas</p>
+                      <p className="text-3xl font-bold text-red-900 mt-2">2</p>
+                      <p className="text-xs text-red-600 mt-2">requieren atención</p>
+                    </div>
+                    <AlertTriangle className="w-8 h-8 text-red-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <h3 className="font-bold text-gray-900 mb-4">Ingresos por hora</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={CHART_DATA_INGRESO_HORA}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="hora" stroke="#6b7280" />
+                      <YAxis stroke="#6b7280" />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="ingresos" stroke="#1E7EC8" strokeWidth={2} dot={{ fill: '#1E7EC8' }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <h3 className="font-bold text-gray-900 mb-4">Ingresos por tipo</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie data={CHART_DATA_TIPO_INGRESO} cx="50%" cy="50%" labelLine={false} label={{ position: 'insideBottomRight', offset: -8 }} outerRadius={80} fill="#8884d8" dataKey="value">
+                        {CHART_DATA_TIPO_INGRESO.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Activity Feed */}
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-4">Últimas acciones (Top 10)</h3>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {DEMO_ACCESOS.slice(0, 10).map((a) => (
+                    <div key={a.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-[#00B5A0] transition">
+                      <div className="w-8 h-8 rounded-full bg-[#00B5A0]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {a.tipo === 'residente' && <Home className="w-4 h-4 text-[#00B5A0]" />}
+                        {a.tipo === 'visitante' && <Users className="w-4 h-4 text-[#1E7EC8]" />}
+                        {a.tipo === 'proveedor' && <Zap className="w-4 h-4 text-amber-500" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium text-gray-900 text-sm">{a.nombre}</p>
+                          <span className="text-xs text-gray-500">{a.hora}</span>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {a.tipo === 'residente' && 'Residente ingresó'}
+                          {a.tipo === 'visitante' && 'Visitante ingresó'}
+                          {a.tipo === 'proveedor' && 'Proveedor ingresó'}
+                          {' '} • {a.destino} • Registrado por {a.registradoPor}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* BITÁCORA */}
+          {activeTab === 'bitacora' && (
+            <motion.div key="bitacora" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <div className="flex gap-4 flex-wrap items-center">
                 <div className="flex-1 relative min-w-[250px]">
                   <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Buscar usuario..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar por nombre o documento..."
+                    value={searchBitacora}
+                    onChange={(e) => setSearchBitacora(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5A0]"
                   />
                 </div>
                 <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive' | 'suspended')}
+                  value={filterTipo}
+                  onChange={(e) => setFilterTipo(e.target.value as any)}
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5A0] bg-white"
                 >
-                  <option value="all">Todos</option>
-                  <option value="active">Activos</option>
-                  <option value="inactive">Inactivos</option>
-                  <option value="suspended">Suspendidos</option>
+                  <option value="todos">Todos</option>
+                  <option value="residente">Residentes</option>
+                  <option value="visitante">Visitantes</option>
+                  <option value="proveedor">Proveedores</option>
                 </select>
                 <button className="px-4 py-2 bg-[#1E7EC8] text-white rounded-lg flex items-center gap-2 hover:bg-[#1E7EC8]/90 transition">
                   <Plus className="w-4 h-4" />
-                  Nuevo Usuario
+                  Nuevo registro
                 </button>
               </div>
 
               <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 border border-blue-200">
-                {filteredUsers.length} usuario(s) encontrado(s) ({users.length} total)
+                {filteredAccesos.length} registro(s) encontrado(s) ({DEMO_ACCESOS.length} total)
               </div>
 
               <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full">
+                <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Usuario</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Rol</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Último Acceso</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Última IP</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">#</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Hora</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Nombre</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Documento</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Tipo</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Destino</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Ingreso</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Salida</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Tiempo</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Registrado por</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.map((u) => (
-                      <tr key={u.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                    {filteredAccesos.map((a, idx) => (
+                      <tr key={a.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <td className="px-6 py-4 text-gray-600">{idx + 1}</td>
+                        <td className="px-6 py-4 text-gray-600 text-xs font-mono">{a.hora}</td>
+                        <td className="px-6 py-4 font-medium text-gray-900">{a.nombre}</td>
+                        <td className="px-6 py-4 text-gray-600 text-xs font-mono">{a.documento}</td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#00B5A0]/20 flex items-center justify-center">
-                              <User className="w-5 h-5 text-[#00B5A0]" />
-                            </div>
-                            <span className="font-medium text-gray-900">{u.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600">{u.email}</td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                            {u.role}
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 capitalize">
+                            {a.tipo}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                            u.status === 'active'
-                              ? 'bg-green-100 text-green-800'
-                              : u.status === 'inactive'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {u.status === 'active' ? 'Activo' : u.status === 'inactive' ? 'Inactivo' : 'Suspendido'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600 text-sm">{u.lastAccess}</td>
-                        <td className="px-6 py-4 text-gray-600 text-sm font-mono text-xs">{u.lastIp}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            {u.status !== 'suspended' && (
-                              <button
-                                onClick={() => handleSuspendUser(u.id)}
-                                className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition"
-                                title="Suspender"
-                              >
-                                <AlertCircle className="w-4 h-4" />
-                              </button>
-                            )}
-                            {u.status === 'suspended' && (
-                              <button
-                                onClick={() => handleReactivateUser(u.id)}
-                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                                title="Reactivar"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDeleteUser(u.id)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                              title="Eliminar"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
+                        <td className="px-6 py-4 text-gray-600">{a.destino}</td>
+                        <td className="px-6 py-4 text-gray-600">{a.ingreso}</td>
+                        <td className="px-6 py-4 text-gray-600">{a.salida || '—'}</td>
+                        <td className="px-6 py-4 text-gray-600 text-xs">{a.tiempo}</td>
+                        <td className="px-6 py-4 text-gray-600 text-xs">{a.registradoPor}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -509,62 +549,124 @@ const AdminSecurityPage = () => {
             </motion.div>
           )}
 
-          {/* Roles y Permisos */}
-          {activeTab === 'roles' && (
-            <motion.div
-              key="roles"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-6"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {['super_admin', 'admin', 'consejo', 'propietario', 'porteria', 'proveedor'].map((role) => (
-                  <motion.div
-                    key={role}
-                    whileHover={{ scale: 1.02 }}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-[#00B5A0] transition cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-bold text-gray-900 capitalize">{role.replace('_', ' ')}</h3>
-                      <Edit className="w-4 h-4 text-gray-400 hover:text-[#00B5A0]" />
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      {ROLE_PERMISSIONS.filter(rp => rp.role === role).map((perm) => (
-                        <div key={perm.id} className="flex items-center gap-2">
-                          <CheckCircle className={`w-4 h-4 ${perm.granted ? 'text-green-500' : 'text-gray-300'}`} />
-                          <span className="text-gray-600">{perm.module}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                ))}
+          {/* VISITANTES */}
+          {activeTab === 'visitantes' && (
+            <motion.div key="visitantes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-600" />
+                  Visitantes esperados hoy
+                </h3>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-2">Matriz de Permisos Completa</h4>
-                <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Nombre</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Documento</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Apto</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Hora esperada</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Invitado por</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Estado</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DEMO_VISITANTES_ESPERADOS.map((v) => (
+                      <tr key={v.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <td className="px-6 py-4 font-medium text-gray-900">{v.nombre}</td>
+                        <td className="px-6 py-4 text-gray-600 text-xs font-mono">{v.documento}</td>
+                        <td className="px-6 py-4 text-gray-600">{v.apto}</td>
+                        <td className="px-6 py-4 text-gray-600">{v.horaEsperada}</td>
+                        <td className="px-6 py-4 text-gray-600">{v.invitadoPor}</td>
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                            Esperado
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 flex gap-2">
+                          <button className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded hover:bg-green-200 transition">
+                            Marcar ingreso
+                          </button>
+                          <button className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded hover:bg-red-200 transition">
+                            Cancelar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 mb-4">Visitantes frecuentes</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { nombre: 'Dr. Juan Cardona', apto: '302', visitas: 12, estado: 'Confianza' },
+                    { nombre: 'Ing. Carlos Pérez', apto: '205', visitas: 8, estado: 'Confianza' },
+                    { nombre: 'Dra. María González', apto: '101', visitas: 6, estado: 'Normal' },
+                  ].map((vf, idx) => (
+                    <div key={idx} className="p-4 bg-white rounded-lg border border-purple-200">
+                      <p className="font-medium text-gray-900">{vf.nombre}</p>
+                      <p className="text-sm text-gray-600 mt-1">Apto {vf.apto} • {vf.visitas} visitas</p>
+                      <p className="text-xs text-purple-600 mt-2">Estado: {vf.estado}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* VEHÍCULOS */}
+          {activeTab === 'vehiculos' && (
+            <motion.div key="vehiculos" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                  <p className="text-blue-600 text-sm font-medium mb-2">Vehículos adentro</p>
+                  <p className="text-4xl font-bold text-blue-900">{conteoVehiculos.dentro}</p>
+                  <p className="text-sm text-blue-600 mt-2">de {conteoVehiculos.total} registrados</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                  <p className="text-green-600 text-sm font-medium mb-2">Parqueaderos disponibles</p>
+                  <p className="text-4xl font-bold text-green-900">{48 - conteoVehiculos.dentro}</p>
+                  <p className="text-sm text-green-600 mt-2">de 48 espacios</p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-4">Vehículos registrados</h3>
+                <div className="overflow-x-auto rounded-lg border border-gray-200">
                   <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-blue-100">
-                        <th className="px-4 py-2 text-left text-gray-700 font-semibold">Rol</th>
-                        <th className="px-4 py-2 text-center text-gray-700 font-semibold">Ver</th>
-                        <th className="px-4 py-2 text-center text-gray-700 font-semibold">Crear</th>
-                        <th className="px-4 py-2 text-center text-gray-700 font-semibold">Editar</th>
-                        <th className="px-4 py-2 text-center text-gray-700 font-semibold">Eliminar</th>
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-3 text-left font-semibold text-gray-700">Placa</th>
+                        <th className="px-6 py-3 text-left font-semibold text-gray-700">Marca</th>
+                        <th className="px-6 py-3 text-left font-semibold text-gray-700">Color</th>
+                        <th className="px-6 py-3 text-left font-semibold text-gray-700">Propietario</th>
+                        <th className="px-6 py-3 text-left font-semibold text-gray-700">Apto</th>
+                        <th className="px-6 py-3 text-left font-semibold text-gray-700">Parqueadero</th>
+                        <th className="px-6 py-3 text-left font-semibold text-gray-700">Estado</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {['super_admin', 'admin', 'consejo', 'porteria'].map((role) => (
-                        <tr key={role} className="border-b border-blue-100">
-                          <td className="px-4 py-2 font-medium text-gray-700 capitalize">{role.replace('_', ' ')}</td>
-                          <td className="px-4 py-2 text-center"><CheckCircle className="w-4 h-4 text-green-500 mx-auto" /></td>
-                          <td className="px-4 py-2 text-center"><CheckCircle className="w-4 h-4 text-green-500 mx-auto" /></td>
-                          <td className="px-4 py-2 text-center"><CheckCircle className="w-4 h-4 text-green-500 mx-auto" /></td>
-                          <td className="px-4 py-2 text-center">
-                            {role === 'super_admin' || role === 'admin' ?
-                              <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> :
-                              <AlertCircle className="w-4 h-4 text-gray-300 mx-auto" />
-                            }
+                      {DEMO_VEHICULOS.map((v) => (
+                        <tr key={v.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                          <td className="px-6 py-4 font-medium text-gray-900 font-mono">{v.placa}</td>
+                          <td className="px-6 py-4 text-gray-600">{v.marca}</td>
+                          <td className="px-6 py-4 text-gray-600">{v.color}</td>
+                          <td className="px-6 py-4 text-gray-600">{v.propietario}</td>
+                          <td className="px-6 py-4 text-gray-600">{v.apto}</td>
+                          <td className="px-6 py-4 text-gray-600 font-mono">{v.parqueadero}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              v.estado === 'dentro'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {v.estado === 'dentro' ? 'Dentro' : 'Fuera'}
+                            </span>
                           </td>
                         </tr>
                       ))}
@@ -575,159 +677,146 @@ const AdminSecurityPage = () => {
             </motion.div>
           )}
 
-          {/* Log de Auditoría */}
-          {activeTab === 'audit' && (
-            <motion.div
-              key="audit"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-6"
-            >
-              {/* Gráfico de Auditoría */}
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-4">Actividad de Sistema (Últimas 24h)</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={AUDIT_CHART_DATA}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="time" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
-                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                    <Legend />
-                    <Line type="monotone" dataKey="success" stroke="#10b981" strokeWidth={2} name="Exitosas" />
-                    <Line type="monotone" dataKey="warning" stroke="#f59e0b" strokeWidth={2} name="Advertencia" />
-                    <Line type="monotone" dataKey="failed" stroke="#ef4444" strokeWidth={2} name="Fallidas" />
-                  </LineChart>
-                </ResponsiveContainer>
+          {/* PERSONAL */}
+          {activeTab === 'personal' && (
+            <motion.div key="personal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="bg-gradient-to-r from-[#0D2B4E] to-[#1E7EC8] rounded-xl p-6 text-white">
+                <p className="text-blue-100 text-sm font-medium mb-2">Turno actual (6:00 AM - 14:00)</p>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">Roberto Casas</p>
+                    <p className="text-blue-100 text-sm">Turno: Mañana (6:00 - 14:00) · 2 novedades</p>
+                  </div>
+                </div>
               </div>
 
-              {/* Filtros */}
-              <div className="flex gap-4 flex-wrap">
-                <input
-                  type="text"
-                  placeholder="Buscar en auditoría..."
-                  value={auditSearchTerm}
-                  onChange={(e) => setAuditSearchTerm(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5A0] flex-1 min-w-[250px]"
-                />
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  Filtros
-                </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
-                  <Download className="w-4 h-4" />
-                  Exportar
-                </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4" />
-                  Actualizar
-                </button>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-4">Turnos de la semana</h3>
+                <div className="space-y-3">
+                  {DEMO_TURNOS.map((t) => (
+                    <div key={t.id} className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00B5A0] transition">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">{t.nombre}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Turno {t.turno.charAt(0).toUpperCase() + t.turno.slice(1)} ({t.horaInicio} - {t.horaFin})
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                          t.novedades > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                        }`}>
+                          {t.novedades} novedades
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Tabla de Logs */}
-              <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 border border-blue-200">
-                {filteredAuditLogs.length} evento(s) encontrado(s) ({auditLogs.length} total)
-              </div>
-
-              <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Hora</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Usuario</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Acción</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Módulo</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">IP</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Estado</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Detalles</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAuditLogs.map((log) => (
-                      <tr key={log.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
-                        <td className="px-6 py-4 text-gray-600 text-xs">{log.timestamp}</td>
-                        <td className="px-6 py-4 font-medium text-gray-900">{log.user}</td>
-                        <td className="px-6 py-4 text-gray-700">{log.action}</td>
-                        <td className="px-6 py-4 text-gray-600">{log.module}</td>
-                        <td className="px-6 py-4 text-gray-600 text-xs font-mono">{log.ip}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 text-xs font-medium rounded ${
-                            log.status === 'success'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {log.status === 'success' ? 'Éxito' : 'Fallida'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600 text-xs">{log.details}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-amber-600" />
+                  Novedades del turno actual
+                </h3>
+                <div className="space-y-2">
+                  {[
+                    { hora: '09:15', desc: 'Visitante sin credencial en Apto 302' },
+                    { hora: '11:30', desc: 'Vehículo mal estacionado en P-5' },
+                  ].map((n, idx) => (
+                    <div key={idx} className="flex gap-3 p-2 bg-white rounded border border-amber-100">
+                      <span className="text-xs font-mono text-amber-700 font-semibold">{n.hora}</span>
+                      <span className="text-sm text-amber-900">{n.desc}</span>
+                    </div>
+                  ))}
+                </div>
+                <button className="mt-4 w-full px-4 py-2 bg-[#1E7EC8] text-white rounded-lg hover:bg-[#1E7EC8]/90 transition">
+                  Agregar novedad
+                </button>
               </div>
             </motion.div>
           )}
 
-          {/* Políticas de Seguridad */}
-          {activeTab === 'policies' && (
-            <motion.div
-              key="policies"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
-            >
-              <button className="px-4 py-2 bg-[#1E7EC8] text-white rounded-lg flex items-center gap-2 hover:bg-[#1E7EC8]/90 transition ml-auto">
-                <Plus className="w-4 h-4" />
-                Nueva Política
-              </button>
+          {/* REPORTES */}
+          {activeTab === 'reportes' && (
+            <motion.div key="reportes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-600 text-sm">Total ingresos mes</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">847</p>
+                  <p className="text-xs text-gray-500 mt-1">Promedio: 28/día</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-600 text-sm">Hora pico</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">7-9 AM</p>
+                  <p className="text-xs text-gray-500 mt-1">Máximo flujo</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-600 text-sm">Día más activo</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">Viernes</p>
+                  <p className="text-xs text-gray-500 mt-1">+15% promedio</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-600 text-sm">Variación mensual</p>
+                  <p className="text-3xl font-bold text-green-700 mt-2">+12%</p>
+                  <p className="text-xs text-gray-500 mt-1">vs mes anterior</p>
+                </div>
+              </div>
 
-              <div className="space-y-3">
-                {SECURITY_POLICIES.map((policy) => (
-                  <motion.div
-                    key={policy.id}
-                    whileHover={{ scale: 1.01 }}
-                    className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-bold text-gray-900">{policy.name}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{policy.description}</p>
-                      </div>
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        policy.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {policy.status === 'active' ? 'Activa' : 'Inactiva'}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Categoría:</span>
-                        <p className="font-medium text-gray-900 capitalize">{policy.category}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Valor:</span>
-                        <p className="font-medium text-gray-900">{policy.value}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Última Mod.:</span>
-                        <p className="font-medium text-gray-900 text-xs">{policy.lastModified}</p>
-                      </div>
-                      <div className="flex gap-2 justify-end">
-                        <button className="p-2 hover:bg-blue-50 rounded text-blue-600 transition">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 hover:bg-gray-100 rounded text-gray-600 transition">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 hover:bg-red-50 rounded text-red-600 transition">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-4">Distribución por tipo (últimos 30 días)</h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={[
+                    { name: 'Residentes', value: 550, fill: '#1E7EC8' },
+                    { name: 'Visitantes', value: 210, fill: '#00B5A0' },
+                    { name: 'Proveedores', value: 87, fill: '#F59E0B' },
+                  ]} layout="vertical" margin={{ left: 100 }}>
+                    <XAxis type="number" />
+                    <Bar dataKey="value" fill="#1E7EC8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <button className="w-full px-4 py-3 bg-[#1E7EC8] text-white rounded-lg hover:bg-[#1E7EC8]/90 transition flex items-center justify-center gap-2 font-medium">
+                <Download className="w-5 h-5" />
+                Generar informe PDF completo
+              </button>
+            </motion.div>
+          )}
+
+          {/* CONFIGURACIÓN */}
+          {activeTab === 'configuracion' && (
+            <motion.div key="configuracion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <div className="space-y-4">
+                {[
+                  { label: 'Tiempo máximo de visita permitido (horas)', value: '4' },
+                  { label: 'Tiempo de espera máximo en portería (min)', value: '30' },
+                ].map((setting, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <label className="font-medium text-gray-900">{setting.label}</label>
+                    <input type="number" defaultValue={setting.value} className="px-3 py-2 border border-gray-300 rounded-lg w-24" />
+                  </div>
+                ))}
+
+                {[
+                  { label: 'Requiere documento para ingresar' },
+                  { label: 'Requiere foto de visitante' },
+                  { label: 'Notificar al residente cuando llega su visita' },
+                  { label: 'Acceso con QR activo' },
+                  { label: 'Registro de vehículos obligatorio' },
+                ].map((toggle, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <label className="font-medium text-gray-900">{toggle.label}</label>
+                    <input type="checkbox" defaultChecked className="w-5 h-5 rounded" />
+                  </div>
                 ))}
               </div>
+
+              <button className="w-full px-4 py-3 bg-[#00B5A0] text-white rounded-lg hover:bg-[#00B5A0]/90 transition font-medium">
+                Guardar configuración
+              </button>
             </motion.div>
           )}
         </div>
