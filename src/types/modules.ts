@@ -15,6 +15,8 @@ export type ModuleId =
   | 'security'
   | 'security_config'
   | 'security_control'
+  | 'admin_security'
+  | 'super_admin_security'
   | 'documents'
   | 'marketplace'
   | 'dashboard'
@@ -46,6 +48,8 @@ export const MODULES: ModuleConfig[] = [
   { id: 'security', label: 'Seguridad', icon: 'ShieldCheck', path: '/seguridad', category: 'specialized' },
   { id: 'security_control', label: 'Control de Seguridad', icon: 'Shield', path: '/seguridad-control', category: 'operative' },
   { id: 'security_config', label: 'Config. Seguridad', icon: 'Settings', path: '/config-seguridad', category: 'specialized' },
+  { id: 'admin_security', label: 'Seguridad y Acceso', icon: 'ShieldAlert', path: '/admin-seguridad', category: 'specialized' },
+  { id: 'super_admin_security', label: 'Seguridad Sistema', icon: 'ShieldAlert', path: '/super-admin-seguridad', category: 'specialized' },
   { id: 'documents', label: 'Documentos', icon: 'FileText', path: '/documentos', category: 'specialized' },
   { id: 'marketplace', label: 'Marketplace', icon: 'Store', path: '/marketplace', category: 'specialized' },
   { id: 'ai_copilot', label: 'IA Copiloto', icon: 'Bot', path: '/ia-copiloto', category: 'advanced' },
@@ -93,6 +97,20 @@ const emptyAccessMap = (): Record<RoleId, AccessLevel> => ({
 
 const getHighestAccess = (moduleId: ModuleId, roleId: RoleId): AccessLevel => {
   if (DISABLED_DERIVED_MODULES.has(moduleId)) {
+    return 'NONE';
+  }
+
+  if (moduleId === 'admin_security' && roleId === 'admin') {
+    return 'FULL_ACCESS';
+  }
+  if (moduleId === 'admin_security') {
+    return 'NONE';
+  }
+
+  if (moduleId === 'super_admin_security' && roleId === 'super_admin') {
+    return 'FULL_ACCESS';
+  }
+  if (moduleId === 'super_admin_security') {
     return 'NONE';
   }
 

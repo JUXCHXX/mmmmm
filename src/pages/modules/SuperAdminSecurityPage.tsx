@@ -5,7 +5,8 @@ import {
   ShieldCheck, Users, Lock, Key, Activity, Trash2, Plus, Edit, Eye, EyeOff,
   CheckCircle, AlertCircle, Clock, User, Mail, Globe, Smartphone, ArrowUpRight,
   ArrowDownLeft, Search, Filter, Download, RefreshCw, MapPin, Car, Calendar, FileText,
-  Bell, AlertTriangle, Home, LogOut, PackageOpen, Zap, Settings2, BarChart3, TrendingUp
+  Bell, AlertTriangle, Home, LogOut, PackageOpen, Zap, Settings2, BarChart3, TrendingUp,
+  ChevronDown, Columns3, RotateCw
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
@@ -53,11 +54,21 @@ interface TurnoPorteria {
   novedades: number;
 }
 
-interface Novedad {
+interface AuditLog {
   id: string;
+  usuario: string;
+  accion: string;
+  registro: string;
+  fecha: string;
   hora: string;
-  descripcion: string;
-  tipo: 'info' | 'warning' | 'alert';
+}
+
+interface Conjunto {
+  id: string;
+  nombre: string;
+  torres: number;
+  residentes: number;
+  status: 'activo' | 'inactivo';
 }
 
 // DEMO DATA
@@ -251,6 +262,66 @@ const DEMO_TURNOS: TurnoPorteria[] = [
   },
 ];
 
+const DEMO_AUDIT_LOGS: AuditLog[] = [
+  {
+    id: '1',
+    usuario: 'Admin User',
+    accion: 'Agregó persona a blacklist',
+    registro: 'José Fernando M.',
+    fecha: '2026-05-28',
+    hora: '14:30',
+  },
+  {
+    id: '2',
+    usuario: 'Super Admin',
+    accion: 'Cambió configuración de QR',
+    registro: 'Acceso con QR activo',
+    fecha: '2026-05-27',
+    hora: '10:15',
+  },
+  {
+    id: '3',
+    usuario: 'Admin User',
+    accion: 'Reseteó PIN de residente',
+    documento: '1051234567',
+    registro: 'Ana García',
+    fecha: '2026-05-26',
+    hora: '09:00',
+  },
+  {
+    id: '4',
+    usuario: 'Super Admin',
+    accion: 'Integración con citófono',
+    registro: 'Sistema Alarma Honeywell',
+    fecha: '2026-05-25',
+    hora: '16:45',
+  },
+];
+
+const DEMO_CONJUNTOS: Conjunto[] = [
+  {
+    id: '1',
+    nombre: 'Conjunto Los Pinos',
+    torres: 3,
+    residentes: 48,
+    status: 'activo',
+  },
+  {
+    id: '2',
+    nombre: 'Parque Residencial Maya',
+    torres: 5,
+    residentes: 120,
+    status: 'activo',
+  },
+  {
+    id: '3',
+    nombre: 'Torres del Centro',
+    torres: 2,
+    residentes: 32,
+    status: 'activo',
+  },
+];
+
 const CHART_DATA_INGRESO_HORA = [
   { hora: '06:00', ingresos: 2 },
   { hora: '07:00', ingresos: 8 },
@@ -275,26 +346,25 @@ const CHART_DATA_TIPO_INGRESO = [
 
 const COLORS = ['#1E7EC8', '#00B5A0', '#F59E0B'];
 
-const AdminSecurityPage = () => {
+const SuperAdminSecurityPage = () => {
   const user = useAuthStore((s) => s.user);
-  const [activeTab, setActiveTab] = useState<'resumen' | 'bitacora' | 'visitantes' | 'vehiculos' | 'personal' | 'reportes' | 'configuracion'>('resumen');
+  const [activeTab, setActiveTab] = useState<'resumen' | 'bitacora' | 'visitantes' | 'vehiculos' | 'personal' | 'reportes' | 'configuracion' | 'administracion' | 'auditoria'>('resumen');
   const [searchBitacora, setSearchBitacora] = useState('');
   const [filterTipo, setFilterTipo] = useState<'todos' | 'residente' | 'visitante' | 'proveedor' | 'empleado'>('todos');
+  const [selectedConjunto, setSelectedConjunto] = useState<string>('1');
+  const [expandedAccessAdmin, setExpandedAccessAdmin] = useState<string | null>(null);
 
-  if (!user || user.roleId !== 'admin') {
+  if (!user || user.roleId !== 'super_admin') {
     return (
       <div className="p-6 text-center">
         <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h2 className="text-xl font-bold text-gray-800">Acceso Denegado</h2>
-        <p className="text-gray-600 mt-2">
-          {user?.roleId === 'super_admin'
-            ? 'Accede a través de Super Admin Seguridad'
-            : 'No tienes permisos para acceder a este módulo'}
-        </p>
+        <p className="text-gray-600 mt-2">Solo Super Admin puede acceder a esta vista</p>
       </div>
     );
   }
 
+  const currentConjunto = DEMO_CONJUNTOS.find(c => c.id === selectedConjunto) || DEMO_CONJUNTOS[0];
   const filteredAccesos = DEMO_ACCESOS.filter(a => {
     const matchSearch = a.nombre.toLowerCase().includes(searchBitacora.toLowerCase()) ||
                        a.documento.toLowerCase().includes(searchBitacora.toLowerCase());
@@ -309,18 +379,18 @@ const AdminSecurityPage = () => {
 
   return (
     <div className="space-y-6 pb-6">
-      {/* Header */}
+      {/* Header with Multi-Conjunto Selector */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-gradient-to-r from-[#0D2B4E] to-[#1E7EC8] rounded-xl p-6 text-white"
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <ShieldCheck className="w-8 h-8" />
             <div>
               <h1 className="text-3xl font-bold">Seguridad y Acceso</h1>
-              <p className="text-blue-100">Control total del conjunto · Administrador</p>
+              <p className="text-blue-100">Control total del sistema · Super Administrador</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -333,6 +403,23 @@ const AdminSecurityPage = () => {
               Configuración
             </button>
           </div>
+        </div>
+
+        {/* Conjunto Selector - P1 Only */}
+        <div className="flex items-center gap-3 bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+          <Columns3 className="w-4 h-4 text-blue-100" />
+          <select
+            value={selectedConjunto}
+            onChange={(e) => setSelectedConjunto(e.target.value)}
+            className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-blue-100 focus:outline-none focus:ring-2 focus:ring-[#00B5A0]"
+          >
+            {DEMO_CONJUNTOS.map(c => (
+              <option key={c.id} value={c.id} className="text-gray-900">
+                {c.nombre} ({c.torres} torres, {c.residentes} residentes)
+              </option>
+            ))}
+          </select>
+          <span className="text-sm text-blue-100 ml-auto">Conjunto: {currentConjunto.nombre}</span>
         </div>
       </motion.div>
 
@@ -347,6 +434,8 @@ const AdminSecurityPage = () => {
             { id: 'personal', label: 'Personal', icon: User },
             { id: 'reportes', label: 'Reportes', icon: FileText },
             { id: 'configuracion', label: 'Configuración', icon: Settings2 },
+            { id: 'administracion', label: 'Accesos', icon: Lock },
+            { id: 'auditoria', label: 'Auditoría', icon: Activity },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -368,10 +457,9 @@ const AdminSecurityPage = () => {
 
         {/* Tab Content */}
         <div className="p-6">
-          {/* RESUMEN */}
+          {/* RESUMEN - Same as Admin but with multi-conjunto awareness */}
           {activeTab === 'resumen' && (
             <motion.div key="resumen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              {/* Metrics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
                   <div className="flex items-start justify-between mb-4">
@@ -418,7 +506,6 @@ const AdminSecurityPage = () => {
                 </div>
               </div>
 
-              {/* Charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                   <h3 className="font-bold text-gray-900 mb-4">Ingresos por hora</h3>
@@ -448,7 +535,6 @@ const AdminSecurityPage = () => {
                 </div>
               </div>
 
-              {/* Activity Feed */}
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                 <h3 className="font-bold text-gray-900 mb-4">Últimas acciones (Top 10)</h3>
                 <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -478,7 +564,7 @@ const AdminSecurityPage = () => {
             </motion.div>
           )}
 
-          {/* BITÁCORA */}
+          {/* BITÁCORA - Same as Admin */}
           {activeTab === 'bitacora' && (
             <motion.div key="bitacora" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
               <div className="flex gap-4 flex-wrap items-center">
@@ -553,7 +639,7 @@ const AdminSecurityPage = () => {
             </motion.div>
           )}
 
-          {/* VISITANTES */}
+          {/* VISITANTES - Same as Admin */}
           {activeTab === 'visitantes' && (
             <motion.div key="visitantes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -602,27 +688,10 @@ const AdminSecurityPage = () => {
                   </tbody>
                 </table>
               </div>
-
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <h3 className="font-bold text-gray-900 mb-4">Visitantes frecuentes</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    { nombre: 'Dr. Juan Cardona', apto: '302', visitas: 12, estado: 'Confianza' },
-                    { nombre: 'Ing. Carlos Pérez', apto: '205', visitas: 8, estado: 'Confianza' },
-                    { nombre: 'Dra. María González', apto: '101', visitas: 6, estado: 'Normal' },
-                  ].map((vf, idx) => (
-                    <div key={idx} className="p-4 bg-white rounded-lg border border-purple-200">
-                      <p className="font-medium text-gray-900">{vf.nombre}</p>
-                      <p className="text-sm text-gray-600 mt-1">Apto {vf.apto} • {vf.visitas} visitas</p>
-                      <p className="text-xs text-purple-600 mt-2">Estado: {vf.estado}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </motion.div>
           )}
 
-          {/* VEHÍCULOS */}
+          {/* VEHÍCULOS - Same as Admin */}
           {activeTab === 'vehiculos' && (
             <motion.div key="vehiculos" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -681,7 +750,7 @@ const AdminSecurityPage = () => {
             </motion.div>
           )}
 
-          {/* PERSONAL */}
+          {/* PERSONAL - Same as Admin */}
           {activeTab === 'personal' && (
             <motion.div key="personal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="bg-gradient-to-r from-[#0D2B4E] to-[#1E7EC8] rounded-xl p-6 text-white">
@@ -719,31 +788,10 @@ const AdminSecurityPage = () => {
                   ))}
                 </div>
               </div>
-
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-amber-600" />
-                  Novedades del turno actual
-                </h3>
-                <div className="space-y-2">
-                  {[
-                    { hora: '09:15', desc: 'Visitante sin credencial en Apto 302' },
-                    { hora: '11:30', desc: 'Vehículo mal estacionado en P-5' },
-                  ].map((n, idx) => (
-                    <div key={idx} className="flex gap-3 p-2 bg-white rounded border border-amber-100">
-                      <span className="text-xs font-mono text-amber-700 font-semibold">{n.hora}</span>
-                      <span className="text-sm text-amber-900">{n.desc}</span>
-                    </div>
-                  ))}
-                </div>
-                <button className="mt-4 w-full px-4 py-2 bg-[#1E7EC8] text-white rounded-lg hover:bg-[#1E7EC8]/90 transition">
-                  Agregar novedad
-                </button>
-              </div>
             </motion.div>
           )}
 
-          {/* REPORTES */}
+          {/* REPORTES - Same as Admin */}
           {activeTab === 'reportes' && (
             <motion.div key="reportes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -790,7 +838,7 @@ const AdminSecurityPage = () => {
             </motion.div>
           )}
 
-          {/* CONFIGURACIÓN */}
+          {/* CONFIGURACIÓN - Same as Admin */}
           {activeTab === 'configuracion' && (
             <motion.div key="configuracion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
               <div className="space-y-4">
@@ -823,10 +871,119 @@ const AdminSecurityPage = () => {
               </button>
             </motion.div>
           )}
+
+          {/* ADMINISTRACIÓN DE ACCESOS - P1 Only */}
+          {activeTab === 'administracion' && (
+            <motion.div key="administracion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-purple-600" />
+                  Gestión de Credenciales y Accesos
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">Crear, resetear y eliminar credenciales de portería, QR y PINs</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { title: 'Crear Credencial', desc: 'Generar nuevo QR o PIN', icon: Plus, color: 'green' },
+                  { title: 'Resetear Contraseña', desc: 'Restaurar acceso a residente', icon: RotateCw, color: 'blue' },
+                  { title: 'Desactivar Acceso', desc: 'Bloquear entrada de persona', icon: Lock, color: 'red' },
+                ].map((action, idx) => {
+                  const Icon = action.icon;
+                  const colorClass = action.color === 'green' ? 'bg-green-50 border-green-200 text-green-600' :
+                                   action.color === 'blue' ? 'bg-blue-50 border-blue-200 text-blue-600' :
+                                   'bg-red-50 border-red-200 text-red-600';
+                  return (
+                    <button
+                      key={idx}
+                      className={`p-6 rounded-lg border-2 ${colorClass} hover:shadow-md transition`}
+                    >
+                      <Icon className="w-8 h-8 mb-2" />
+                      <p className="font-bold text-gray-900">{action.title}</p>
+                      <p className="text-xs text-gray-600 mt-1">{action.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="font-bold text-gray-900">Log de cambios recientes</h4>
+                {[
+                  { usuario: 'Admin User', accion: 'Reseteo de QR', residente: 'Ana García', fecha: 'Hoy 14:30' },
+                  { usuario: 'Super Admin', accion: 'Creó nuevo PIN', residente: 'Luis Torres', fecha: 'Ayer 10:15' },
+                  { usuario: 'Admin User', accion: 'Desactivó acceso', residente: 'José Fernando M.', fecha: '2 días atrás' },
+                ].map((log, idx) => (
+                  <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">{log.accion}</p>
+                        <p className="text-sm text-gray-600 mt-1">{log.residente} • Por: {log.usuario}</p>
+                      </div>
+                      <span className="text-xs text-gray-500">{log.fecha}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* AUDITORÍA - P1 Only */}
+          {activeTab === 'auditoria' && (
+            <motion.div key="auditoria" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-indigo-600" />
+                  Auditoría de Acciones Administrativas
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">Registro completo de cambios en configuración y gestión (últimos 30 días)</p>
+              </div>
+
+              <div className="flex gap-3 flex-wrap">
+                <input
+                  type="date"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5A0]"
+                />
+                <select className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5A0] bg-white">
+                  <option>Todos los usuarios</option>
+                  <option>Super Admin</option>
+                  <option>Admin Users</option>
+                </select>
+                <button className="px-4 py-2 bg-[#1E7EC8] text-white rounded-lg hover:bg-[#1E7EC8]/90 transition flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  Exportar Auditoría
+                </button>
+              </div>
+
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Fecha</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Hora</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Usuario</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Acción</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Registro Afectado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DEMO_AUDIT_LOGS.map((log) => (
+                      <tr key={log.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <td className="px-6 py-4 text-gray-600 text-xs font-mono">{log.fecha}</td>
+                        <td className="px-6 py-4 text-gray-600 text-xs font-mono">{log.hora}</td>
+                        <td className="px-6 py-4 font-medium text-gray-900">{log.usuario}</td>
+                        <td className="px-6 py-4 text-gray-600">{log.accion}</td>
+                        <td className="px-6 py-4 text-gray-600">{log.registro}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default AdminSecurityPage;
+export default SuperAdminSecurityPage;

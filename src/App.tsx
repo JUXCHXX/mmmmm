@@ -20,6 +20,7 @@ import MaintenancePage from "./pages/modules/MaintenancePage";
 import SecurityPage from "./pages/modules/SecurityPage";
 import SecurityControlPage from "./pages/modules/SecurityControlPage";
 import AdminSecurityPage from "./pages/modules/AdminSecurityPage";
+import SuperAdminSecurityPage from "./pages/modules/SuperAdminSecurityPage";
 import DocumentsPage from "./pages/modules/DocumentsPage";
 import MarketplacePage from "./pages/modules/MarketplacePage";
 import AICopilotPage from "./pages/modules/AICopilotPage";
@@ -75,6 +76,8 @@ const AppContent = () => (
         <Route path="/seguridad-control" element={<SecurityControlPage />} />
         <Route path="/config-seguridad" element={<AdminSecurityPage />} />
         <Route path="/auditoria-seguridad" element={<AdminSecurityPage />} />
+        <Route path="/admin-seguridad" element={<AdminSecurityPage />} />
+        <Route path="/super-admin-seguridad" element={<SuperAdminSecurityPage />} />
         <Route path="/documentos" element={<DocumentsPage />} />
         <Route path="/marketplace" element={<MarketplacePage />} />
         <Route path="/ia-copiloto" element={<AICopilotPage />} />
