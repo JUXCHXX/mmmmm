@@ -33,10 +33,10 @@ interface ExtendedProperty {
 }
 
 export const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, switchRole } = useAuthStore();
   const appStore = useAppStore();
   const [activeTab, setActiveTab] = useState<'profile' | 'activity'>('profile');
-  
+
   if (!user) return null;
 
   // Fallback data
@@ -45,6 +45,11 @@ export const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => 
 
   const handleLogout = () => {
     logout();
+    onClose();
+  };
+
+  const handleSwitchRole = (roleId: 'super_admin' | 'admin') => {
+    switchRole(roleId);
     onClose();
   };
 
@@ -88,6 +93,39 @@ export const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => 
             </div>
           )}
         </div>
+      </motion.div>
+
+      {/* Role Switcher - Testing */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <h3 className="font-semibold text-lg mb-4 flex items-center gap-2 text-gray-900">
+          <Shield className="w-5 h-5 text-purple-600" />
+          Cambiar Rol (Testing)
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => handleSwitchRole('super_admin')}
+            className={`p-3 rounded-xl border-2 transition-all ${
+              user.roleId === 'super_admin'
+                ? 'bg-purple-100 border-purple-500 text-purple-900 font-semibold'
+                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-purple-50'
+            }`}
+          >
+            <div className="text-sm font-semibold">Super Admin</div>
+            <div className="text-xs text-gray-600">P1</div>
+          </button>
+          <button
+            onClick={() => handleSwitchRole('admin')}
+            className={`p-3 rounded-xl border-2 transition-all ${
+              user.roleId === 'admin'
+                ? 'bg-blue-100 border-blue-500 text-blue-900 font-semibold'
+                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-blue-50'
+            }`}
+          >
+            <div className="text-sm font-semibold">Administrador</div>
+            <div className="text-xs text-gray-600">P2</div>
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-3">Usa estos botones para testear la vista de Seguridad del Conjunto</p>
       </motion.div>
 
       {/* Role & Permissions */}
